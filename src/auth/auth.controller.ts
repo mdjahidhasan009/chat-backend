@@ -4,13 +4,12 @@ import {
   Get,
   Inject,
   Post,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { Routes, Services } from '../utils/constants';
 import { IAuthService } from './auth';
 import { CreateUserDto } from './dtos/CreateUser.dto';
 import { IUserService } from '../users/user';
+import { instanceToPlain } from 'class-transformer';
 
 @Controller(Routes.AUTH)
 export class AuthController {
@@ -21,8 +20,7 @@ export class AuthController {
 
   @Post('register')
   registerUser(@Body() createUserDto: CreateUserDto) {
-    console.log(createUserDto);
-    this.userService.createUser(createUserDto);
+    return instanceToPlain(this.userService.createUser(createUserDto));
   }
 
   @Post('login')
