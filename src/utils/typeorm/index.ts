@@ -1,5 +1,9 @@
 import { User } from './entries/User';
-const entities = [User];
+import { Session } from './entries/Session';
 
-export { User };
+const entities = [User, Session];
+
 export default entities;
+
+export { User, Session };
+////TODO: Have to upgrade to datasource means latest version
