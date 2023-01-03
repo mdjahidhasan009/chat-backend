@@ -3,6 +3,8 @@ import { Routes, Services } from '../utils/constants';
 import { AuthenticatedGuard } from '../auth/utils/Guards';
 import { IConversationsService } from './conversations';
 import { CreateConversationDto } from './dtos/CreateConversation.dto';
+import { AuthUser } from '../utils/decorators';
+import { User } from '../utils/typeorm';
 
 @Controller(Routes.CONVERSATIONS)
 @UseGuards(AuthenticatedGuard)
@@ -12,10 +14,13 @@ export class ConversationsController {
     private readonly conversationsService: IConversationsService,
   ) {}
   @Post()
-  createConversations(
+  async createConversations(
+    @AuthUser() user: User,
     @Body() createConversationPayload: CreateConversationDto,
   ) {
-    console.log(createConversationPayload);
-    this.conversationsService.createConversation(createConversationPayload);
+    return this.conversationsService.createConversation(
+      user,
+      createConversationPayload,
+    );
   }
 }
