@@ -25,6 +25,7 @@ import * as process from 'process';
       database: process.env.MYSQL_DB_NAME,
       synchronize: true,
       entities,
+      logging: true,
     }),
     ConversationsModule,
     ParticipantsModule,
