@@ -1,14 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-
+import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { PassportModule } from '@nestjs/passport';
-import entities from './utils/typeorm';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConversationsModule } from './conversations/conversations.module';
-import { ParticipantsModule } from './participants/participants.module';
-import * as process from 'process';
+import entities from './utils/typeorm';
 
 @Module({
   imports: [
@@ -25,10 +22,8 @@ import * as process from 'process';
       database: process.env.MYSQL_DB_NAME,
       synchronize: true,
       entities,
-      logging: true,
     }),
     ConversationsModule,
-    ParticipantsModule,
   ],
   controllers: [],
   providers: [],

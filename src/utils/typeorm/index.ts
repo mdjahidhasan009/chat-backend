@@ -1,11 +1,10 @@
-import { User } from './entries/User';
-import { Session } from './entries/Session';
-import { Conversation } from './entries/Conversation';
-import { Participant } from './entries/Participant';
+import { User } from './entities/User';
+import { Session } from './entities/Session';
+import { Conversation } from './entities/Conversation';
 
-const entities = [User, Session, Conversation, Participant];
+const entities = [User, Session, Conversation];
 
 export default entities;
 
-export { User, Session, Conversation, Participant };
+export { User, Session, Conversation };
 ////TODO: Have to upgrade to datasource means latest version
