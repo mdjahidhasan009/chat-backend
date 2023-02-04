@@ -5,12 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConversationsModule } from './conversations/conversations.module';
+import { MessagesModule } from './messages/messages.module';
 import entities from './utils/typeorm';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
+    ConversationsModule,
     ConfigModule.forRoot({ envFilePath: '.env.development' }),
     PassportModule.register({ session: true }),
     TypeOrmModule.forRoot({
@@ -23,7 +25,7 @@ import entities from './utils/typeorm';
       synchronize: true,
       entities,
     }),
-    ConversationsModule,
+    MessagesModule,
   ],
   controllers: [],
   providers: [],
