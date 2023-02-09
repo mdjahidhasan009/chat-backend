@@ -30,14 +30,30 @@ export class MessageService implements IMessageService {
     if (creator.id === user.id && recipient.id === user.id)
       throw new HttpException('Cannot Create Message', HttpStatus.FORBIDDEN);
 
-    conversation.creator = instanceToPlain(conversation.creator) as User;
-    conversation.recipient = instanceToPlain(conversation.recipient) as User;
+    // conversation.creator = instanceToPlain(conversation.creator) as User;
+    // conversation.recipient = instanceToPlain(conversation.recipient) as User;
     const newMessage = this.messageRepository.create({
       content,
       conversation,
       author: instanceToPlain(user),
-      // createdAt: Date.now(),
     });
-    return await this.messageRepository.save(newMessage);
+    const savedMessage = await this.messageRepository.save(newMessage);
+    conversation.lastMessageSent = savedMessage;
+    await this.conversationRepository.save(conversation);
+    return;
+  }
+
+  getMessagesByConversationId(conversationId: number): Promise<Message[]> {
+    return this.messageRepository.find({
+      where: {
+        conversation: {
+          id: conversationId,
+        },
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      relations: ['author'],
+    });
   }
 }
