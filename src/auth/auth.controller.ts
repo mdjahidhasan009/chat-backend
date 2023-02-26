@@ -4,7 +4,8 @@ import {
   Get,
   HttpStatus,
   Inject,
-  Post, Req,
+  Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -37,7 +38,6 @@ export class AuthController {
   @Get('status')
   @UseGuards(AuthenticatedGuard)
   status(@Req() req: Request, @Res() res: Response) {
-    console.log(req.user);
     res.send(req.user);
   }
 
