@@ -11,6 +11,7 @@ import { IGatewaySessionManager } from './gateway.session';
 import { Services } from '../utils/constants';
 import { Inject } from '@nestjs/common';
 import { AuthenticatedSocket } from '../utils/interfaces';
+import {CreateMessageResponse} from "../utils/types";
 
 @WebSocketGateway({
   cors: {
@@ -38,11 +39,11 @@ export class MessagingGateway implements OnGatewayConnection {
   }
 
   @OnEvent('message.create')
-  handleMessageCreateEvent(payload: any) {
+  handleMessageCreateEvent(payload: CreateMessageResponse) {
     const {
       author,
       conversation: { creator, recipient },
-    } = payload;
+    } = payload.message;
 
     const authorSocket = this.sessions.getUserSocket(author.id);
     const recipientSocket =

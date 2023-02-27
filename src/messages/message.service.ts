@@ -14,14 +14,11 @@ export class MessageService implements IMessageService {
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
   ) {}
-  async createMessage({
-    user,
-    content,
-    conversationId,
-  }: CreateMessageParams): Promise<Message> {
+
+  async createMessage({ user, content, conversationId }: CreateMessageParams) {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
-      relations: ['creator', 'recipient'],
+      relations: ['creator', 'recipient', 'lastMessageSent'],
     });
     if (!conversation) {
       throw new HttpException('Conversation not found', HttpStatus.BAD_REQUEST);
@@ -32,15 +29,17 @@ export class MessageService implements IMessageService {
 
     // conversation.creator = instanceToPlain(conversation.creator) as User;
     // conversation.recipient = instanceToPlain(conversation.recipient) as User;
-    const newMessage = this.messageRepository.create({
+    const message = this.messageRepository.create({
       content,
       conversation,
       author: instanceToPlain(user),
     });
-    const savedMessage = await this.messageRepository.save(newMessage);
+    const savedMessage = await this.messageRepository.save(message);
     conversation.lastMessageSent = savedMessage;
-    await this.conversationRepository.save(conversation);
-    return savedMessage;
+    const updatedConversation = await this.conversationRepository.save(
+      conversation,
+    );
+    return { message: savedMessage, conversation: updatedConversation };
   }
 
   getMessagesByConversationId(conversationId: number): Promise<Message[]> {
