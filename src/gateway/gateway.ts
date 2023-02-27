@@ -24,13 +24,13 @@ export class MessagingGateway implements OnGatewayConnection {
     private readonly sessions: IGatewaySessionManager,
   ) {}
 
+  @WebSocketServer()
+  server: Server;
+
   handleConnection(socket: AuthenticatedSocket, ...args: any[]) {
     this.sessions.setUserSocket(socket.user.id, socket);
     socket.emit('connected', { status: 'good' });
   }
-
-  @WebSocketServer()
-  server: Server;
 
   @SubscribeMessage('createMessage')
   handleCreateMessage(@MessageBody() data: any) {
@@ -39,8 +39,6 @@ export class MessagingGateway implements OnGatewayConnection {
 
   @OnEvent('message.create')
   handleMessageCreateEvent(payload: any) {
-    console.log('hello msg');
-    console.log(payload);
     const {
       author,
       conversation: { creator, recipient },
@@ -51,7 +49,7 @@ export class MessagingGateway implements OnGatewayConnection {
       author.id === creator.id
         ? this.sessions.getUserSocket(recipient.id)
         : this.sessions.getUserSocket(creator.id);
-    recipientSocket.emit('onMessage', payload);
-    authorSocket.emit('onMessage', payload );
+    if (recipientSocket) recipientSocket.emit('onMessage', payload);
+    if (authorSocket) authorSocket.emit('onMessage', payload);
   }
 }
