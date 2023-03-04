@@ -1,19 +1,20 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthenticatedGuard } from '../auth/utils/Guards';
 import { Routes, Services } from '../utils/constants';
 import { AuthUser } from '../utils/decorators';
 import { User } from '../utils/typeorm';
 import { IConversationsService } from './conversations';
 import { CreateConversationDto } from './dtos/CreateConversation.dto';
-import {EventEmitter2} from "@nestjs/event-emitter";
 
 @Controller(Routes.CONVERSATIONS)
 @UseGuards(AuthenticatedGuard)
@@ -29,6 +30,7 @@ export class ConversationsController {
     @AuthUser() user: User,
     @Body() createConversationPayload: CreateConversationDto,
   ) {
+    console.log('createConversation');
     const conversation = await this.conversationsService.createConversation(
       user,
       createConversationPayload,
@@ -49,4 +51,6 @@ export class ConversationsController {
     );
     return conversation;
   }
+
+  // @Delete(':conversationId/messages/:messageId')
 }
