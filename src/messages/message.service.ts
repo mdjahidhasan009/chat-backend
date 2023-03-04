@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { IMessageService } from './message';
 import { Conversation, Message, User } from '../utils/typeorm';
-import { CreateMessageParams } from '../utils/types';
+import { CreateMessageParams, DeleteMessageParams } from '../utils/types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { instanceToPlain } from 'class-transformer';
@@ -54,5 +54,49 @@ export class MessageService implements IMessageService {
       },
       relations: ['author'],
     });
+  }
+
+  async deleteMessage(params: DeleteMessageParams) {
+    const conversation = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .where('id = :conversationId', { conversationId: params.conversationId })
+      .leftJoinAndSelect('conversation.lastMessageSent', 'lastMessageSent')
+      .leftJoinAndSelect('conversation.messages', 'message')
+      .where('conversation.id === message.conversationId')
+      .orderBy('message.createdAt', 'DESC')
+      .limit(5)
+      .getOne();
+
+    if (!conversation)
+      throw new HttpException('Conversation not found', HttpStatus.BAD_REQUEST);
+
+    const message = await this.messageRepository.findOne({
+      id: params.messageId,
+      author: { id: params.userId },
+      conversation: { id: params.conversationId },
+    });
+
+    if (!message) {
+      throw new HttpException('Cannot delete message', HttpStatus.BAD_REQUEST);
+    }
+    if (conversation.lastMessageSent.id !== message.id)
+      return this.messageRepository.delete({ id: message.id });
+
+    //Delete Last Message
+    const size = conversation.messages.length;
+    const SECOND_MESSAGE_INDEX = 1;
+    if (size <= 1) {
+      await this.conversationRepository.update(
+        { id: params.conversationId },
+        { lastMessageSent: null },
+      );
+    } else {
+      const newLastMessage = conversation.messages[SECOND_MESSAGE_INDEX];
+      await this.conversationRepository.update(
+        { id: params.conversationId },
+        { lastMessageSent: newLastMessage },
+      );
+      await this.messageRepository.delete({ id: message.id });
+    }
   }
 }
