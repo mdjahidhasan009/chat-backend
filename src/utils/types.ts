@@ -53,10 +53,15 @@ export type DeleteMessageParams = {
   messageId: number;
 };
 
-
 export type EditMessageParams = {
   conversationId: number;
   messageId: number;
   userId: number;
   content: string;
+};
+
+export type CreateGroupParams = {
+  creator: User;
+  title?: string;
+  users: string[];
 };
