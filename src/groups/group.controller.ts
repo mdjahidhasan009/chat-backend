@@ -1,5 +1,5 @@
 import { Routes, Services } from '../utils/constants';
-import {Body, Controller, Get, Inject, Param, Post} from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
 import { IGroupService } from './group';
 import { AuthUser } from '../utils/decorators';
 import { CreateGroupDto } from './dtos/CreateGroup.dto';
