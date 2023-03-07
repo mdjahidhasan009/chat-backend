@@ -12,7 +12,7 @@ import { User } from './User';
 import { Message } from './Message';
 
 @Entity({ name: 'group_conversations' })
-export class GroupConversation {
+export class Group {
   @PrimaryGeneratedColumn()
   id: number;
 
