@@ -2,7 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn, JoinTable,
+  JoinColumn,
+  JoinTable,
   ManyToMany,
   OneToMany,
   OneToOne,
@@ -11,6 +12,7 @@ import {
 } from 'typeorm';
 import { User } from './User';
 import { Message } from './Message';
+import {GroupMessage} from "./GroupMessage";
 
 @Entity({ name: 'group_conversations' })
 export class Group {
@@ -28,18 +30,18 @@ export class Group {
   @JoinColumn()
   creator: User;
 
-  @OneToMany(() => Message, (message) => message.group, {
+  @OneToMany(() => GroupMessage, (message) => message.group, {
     cascade: ['insert', 'update', 'remove'],
   })
   @JoinColumn()
-  messages: Message[];
+  messages: GroupMessage[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: number;
 
-  @OneToOne(() => Message)
+  @OneToOne(() => GroupMessage)
   @JoinColumn({ name: 'last_message_sent' })
-  lastMessageSent: Message;
+  lastMessageSent: GroupMessage;
 
   @UpdateDateColumn({ name: 'updated_at' })
   lastMessageSentAt: Date;
