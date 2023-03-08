@@ -12,7 +12,7 @@ import { IGatewaySessionManager } from './gateway.session';
 import { Services } from '../utils/constants';
 import { Inject } from '@nestjs/common';
 import { AuthenticatedSocket } from '../utils/interfaces';
-import { CreateMessageResponse } from '../utils/types';
+import {CreateGroupMessageResponse, CreateMessageResponse} from '../utils/types';
 import { Conversation, Message } from '../utils/typeorm';
 import { IConversationsService } from '../conversations/conversations';
 
@@ -49,8 +49,8 @@ export class MessagingGateway implements OnGatewayConnection {
     @ConnectedSocket() client: AuthenticatedSocket,
     ws: Socket,
   ) {
-    client.join(data.conversationId);
-    client.to(data.conversationId).emit('userJoin');
+    client.join(`conversation-${data.conversationId}`);
+    client.to(`conversation-${data.conversationId}`).emit('userJoin');
   }
 
   @SubscribeMessage('onConversationLeave')
@@ -58,8 +58,8 @@ export class MessagingGateway implements OnGatewayConnection {
     @MessageBody() data: any,
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
-    client.leave(data.conversationId);
-    client.to(data.conversatinId).emit('userLeave');
+    client.leave(`conversation-${data.conversationId}`);
+    client.to(`conversation-${data.conversationId}`).emit('userLeave');
   }
 
   @SubscribeMessage('onTypingStart')
@@ -67,7 +67,7 @@ export class MessagingGateway implements OnGatewayConnection {
     @MessageBody() data: any,
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
-    client.to(data.conversationId).emit('onTypingStart');
+    client.to(`conversation-${data.conversationId}`).emit('onTypingStart');
   }
 
   @SubscribeMessage('onTypingStop')
@@ -75,7 +75,7 @@ export class MessagingGateway implements OnGatewayConnection {
     @MessageBody() data: any,
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
-    client.to(data.conversationId).emit('onTypingStop');
+    client.to(`conversation-${data.conversationId}`).emit('onTypingStop');
   }
 
   @OnEvent('message.create')
@@ -126,4 +126,7 @@ export class MessagingGateway implements OnGatewayConnection {
         : this.sessions.getUserSocket(creator.id);
     if (recipientSocket) recipientSocket.emit('onMessageUpdate', message);
   }
+
+  @OnEvent('group.message.create')
+  async handleGroupMessageCreate(payload: CreateGroupMessageResponse) {}
 }
