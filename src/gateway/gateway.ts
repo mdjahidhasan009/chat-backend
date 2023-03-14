@@ -1,7 +1,7 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
+  OnGatewayConnection, OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -16,8 +16,9 @@ import {
   CreateGroupMessageResponse,
   CreateMessageResponse,
 } from '../utils/types';
-import { Conversation, Message } from '../utils/typeorm';
+import { Conversation, Group, GroupMessage, Message } from '../utils/typeorm';
 import { IConversationsService } from '../conversations/conversations';
+import { IGroupService } from '../groups/group';
 
 @WebSocketGateway({
   cors: {
@@ -25,12 +26,14 @@ import { IConversationsService } from '../conversations/conversations';
     credentials: true,
   },
 })
-export class MessagingGateway implements OnGatewayConnection {
+export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     @Inject(Services.GATEWAY_SESSION_MANAGER)
     private readonly sessions: IGatewaySessionManager,
     @Inject(Services.CONVERSATIONS)
     private readonly conversationService: IConversationsService,
+    @Inject(Services.GROUPS)
+    private readonly groupsService: IGroupService,
   ) {}
 
   @WebSocketServer()
@@ -39,6 +42,31 @@ export class MessagingGateway implements OnGatewayConnection {
   handleConnection(socket: AuthenticatedSocket, ...args: any[]) {
     this.sessions.setUserSocket(socket.user.id, socket);
     socket.emit('connected', {});
+  }
+
+  handleDisconnect(socket: AuthenticatedSocket) {
+    this.sessions.removeUserSocket(socket.user.id);
+  }
+
+  @SubscribeMessage('getOnlineGroupUsers')
+  async handleGetOnlineGroupUsers(
+    @MessageBody() data: any,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    console.log('handleGetOnlineGroupUsers');
+    console.log(data);
+    const group = await this.groupsService.findGroupById(
+      parseInt(data.groupId),
+    );
+    if (!group) return;
+    const onlineUsers = [];
+    const offlineUsers = [];
+    group.users.forEach((user) => {
+      const socket = this.sessions.getUserSocket(user.id);
+      socket ? onlineUsers.push(user) : offlineUsers.push(user);
+    });
+
+    socket.emit('onlineGroupUsersReceived', { onlineUsers, offlineUsers });
   }
 
   @SubscribeMessage('createMessage')
@@ -152,5 +180,19 @@ export class MessagingGateway implements OnGatewayConnection {
   async handleGroupMessageCreate(payload: CreateGroupMessageResponse) {
     const { id } = payload.group;
     this.server.to(`group-${id}`).emit('onGroupMessage', payload);
+  }
+
+  @OnEvent('group.create')
+  handleGroupCreate(payload: Group) {
+    payload.users.forEach((user) => {
+      const socket = this.sessions.getUserSocket(user.id);
+      socket && socket.emit('onGroupCreate', payload);
+    });
+  }
+
+  @OnEvent('group.message.update')
+  handleGroupMessageUpdate(payload: GroupMessage) {
+    const room = `group-${payload.group.id}`;
+    this.server.to(room).emit('onGroupMessageUpdate', payload);
   }
 }

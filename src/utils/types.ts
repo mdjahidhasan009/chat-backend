@@ -64,6 +64,13 @@ export type EditMessageParams = {
   content: string;
 };
 
+export type EditGroupMessageParams = {
+  groupId: number;
+  messageId: number;
+  userId: number;
+  content: string;
+};
+
 export type CreateGroupParams = {
   creator: User;
   title?: string;
@@ -83,4 +90,10 @@ export type CreateGroupMessageParams = {
 export type CreateGroupMessageResponse = {
   message: GroupMessage;
   group: Group;
+};
+
+export type DeleteGroupMessageParams = {
+  userId: number;
+  groupId: number;
+  messageId: number;
 };
