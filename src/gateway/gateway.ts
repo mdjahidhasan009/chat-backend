@@ -1,7 +1,8 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection, OnGatewayDisconnect,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -18,7 +19,7 @@ import {
 } from '../utils/types';
 import { Conversation, Group, GroupMessage, Message } from '../utils/typeorm';
 import { IConversationsService } from '../conversations/conversations';
-import { IGroupService } from '../groups/group';
+import { IGroupService } from '../groups/interfaces/group';
 
 @WebSocketGateway({
   cors: {

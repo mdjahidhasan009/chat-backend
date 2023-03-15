@@ -1,5 +1,5 @@
-import { CreateGroupParams, FetchGroupsParams } from '../utils/types';
-import { Group } from '../utils/typeorm';
+import { CreateGroupParams, FetchGroupsParams } from '../../utils/types';
+import { Group } from '../../utils/typeorm';
 
 export interface IGroupService {
   createGroup(params: CreateGroupParams);
