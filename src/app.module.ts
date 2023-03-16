@@ -29,22 +29,23 @@ import { APP_GUARD } from '@nestjs/core';
       database: process.env.MYSQL_DB_NAME,
       synchronize: true,
       entities,
+      logging: false,
     }),
     MessagesModule,
     GatewayModule,
     GroupModule,
-    ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 10,
-    }),
+    // ThrottlerModule.forRoot({
+    //   ttl: 60,
+    //   limit: 10,
+    // }),
     EventEmitterModule.forRoot(),
   ],
   controllers: [],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ThrottlerGuard,
+    // },
   ],
 })
 export class AppModule {}

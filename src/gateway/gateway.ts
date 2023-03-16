@@ -14,6 +14,7 @@ import { Services } from '../utils/constants';
 import { Inject } from '@nestjs/common';
 import { AuthenticatedSocket } from '../utils/interfaces';
 import {
+  AddGroupUserResponse,
   CreateGroupMessageResponse,
   CreateMessageResponse,
 } from '../utils/types';
@@ -27,7 +28,9 @@ import { IGroupService } from '../groups/interfaces/group';
     credentials: true,
   },
 })
-export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class MessagingGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     @Inject(Services.GATEWAY_SESSION_MANAGER)
     private readonly sessions: IGatewaySessionManager,
@@ -54,8 +57,6 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
     @MessageBody() data: any,
     @ConnectedSocket() socket: AuthenticatedSocket,
   ) {
-    console.log('handleGetOnlineGroupUsers');
-    console.log(data);
     const group = await this.groupsService.findGroupById(
       parseInt(data.groupId),
     );
@@ -195,5 +196,14 @@ export class MessagingGateway implements OnGatewayConnection, OnGatewayDisconnec
   handleGroupMessageUpdate(payload: GroupMessage) {
     const room = `group-${payload.group.id}`;
     this.server.to(room).emit('onGroupMessageUpdate', payload);
+  }
+
+  @OnEvent('group.user.add')
+  handleGroupUserAdd(payload: AddGroupUserResponse) {
+    const recipientSocket = this.sessions.getUserSocket(payload.user.id);
+    this.server
+      .to(`group-${payload.group.id}`)
+      .emit('onGroupReceivedNewUser', payload);
+    recipientSocket && recipientSocket.emit('onGroupUserAdd', payload);
   }
 }
