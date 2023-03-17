@@ -2,7 +2,8 @@ import { Exclude } from 'class-transformer';
 import {
   Column,
   Entity,
-  JoinColumn, ManyToMany,
+  JoinColumn,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';

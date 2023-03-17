@@ -16,7 +16,7 @@ import { AuthenticatedSocket } from '../utils/interfaces';
 import {
   AddGroupUserResponse,
   CreateGroupMessageResponse,
-  CreateMessageResponse,
+  CreateMessageResponse, RemoveGroupUserResponse,
 } from '../utils/types';
 import { Conversation, Group, GroupMessage, Message } from '../utils/typeorm';
 import { IConversationsService } from '../conversations/conversations';
@@ -205,5 +205,12 @@ export class MessagingGateway
       .to(`group-${payload.group.id}`)
       .emit('onGroupReceivedNewUser', payload);
     recipientSocket && recipientSocket.emit('onGroupUserAdd', payload);
+  }
+
+  @OnEvent('group.user.remove')
+  handleGroupUserRemove(payload: RemoveGroupUserResponse) {
+    this.server
+      .to(`group-${payload.group.id}`)
+      .emit('onGroupRemovedUser', payload);
   }
 }
