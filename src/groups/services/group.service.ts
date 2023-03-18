@@ -5,7 +5,12 @@ import { Group } from '../../utils/typeorm';
 import { Repository } from 'typeorm';
 import { Services } from '../../utils/constants';
 import { IUserService } from '../../users/user';
-import { CreateGroupParams, FetchGroupsParams } from '../../utils/types';
+import {
+  AccessParams,
+  CreateGroupParams,
+  FetchGroupsParams,
+} from '../../utils/types';
+import { GroupNotFoundException } from '../exceptions/GroupNotFound';
 
 @Injectable()
 export class GroupService implements IGroupService {
@@ -45,5 +50,11 @@ export class GroupService implements IGroupService {
 
   saveGroup(group: Group): Promise<Group> {
     return this.groupRepository.save(group);
+  }
+
+  async hasAccess({ id, userId }: AccessParams) {
+    const group = await this.findGroupById(id);
+    if (!group) throw new GroupNotFoundException();
+    return group.users.find((user) => user.id === userId);
   }
 }
