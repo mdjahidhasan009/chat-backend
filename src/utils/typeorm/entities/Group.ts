@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { User } from './User';
 import { Message } from './Message';
-import {GroupMessage} from "./GroupMessage";
+import { GroupMessage } from './GroupMessage';
 
 @Entity({ name: 'group_conversations' })
 export class Group {
@@ -29,6 +29,10 @@ export class Group {
   @OneToOne(() => User, { createForeignKeyConstraints: false })
   @JoinColumn()
   creator: User;
+
+  @OneToOne(() => User, { createForeignKeyConstraints: false })
+  @JoinColumn()
+  owner: User;
 
   @OneToMany(() => GroupMessage, (message) => message.group, {
     cascade: ['insert', 'update', 'remove'],

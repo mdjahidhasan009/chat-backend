@@ -16,7 +16,8 @@ import { AuthenticatedSocket } from '../utils/interfaces';
 import {
   AddGroupUserResponse,
   CreateGroupMessageResponse,
-  CreateMessageResponse, RemoveGroupUserResponse,
+  CreateMessageResponse,
+  RemoveGroupUserResponse,
 } from '../utils/types';
 import { Conversation, Group, GroupMessage, Message } from '../utils/typeorm';
 import { IConversationsService } from '../conversations/conversations';
@@ -220,5 +221,23 @@ export class MessagingGateway
     const onlineUsers = group.users
       .map((user) => this.sessions.getUserSocket(user.id) && user)
       .filter((user) => user);
+  }
+
+  @OnEvent('group.message.update')
+  handleGroupOwnerUpdate(payload: Group) {
+    const ROOM_NAME = `group-${payload.id}`;
+    const newOwnerSocket = this.sessions.getUserSocket(payload.owner.id);
+    const { rooms } = this.server.sockets.adapter;
+    const socketsInRoom = rooms.get(ROOM_NAME);
+    this.server.to(ROOM_NAME).emit('onGroupOwnerUpdate', payload);
+    if (newOwnerSocket && !socketsInRoom.has(newOwnerSocket.id)) {
+      newOwnerSocket.emit('onGroupOwnerUpdate', payload);
+    }
+  }
+
+  @OnEvent('group.user.leave')
+  handleGroupUserLeave(payload) {
+    const ROOM_NAME = `group-${payload.group.id}`;
+    this.server.to(ROOM_NAME).emit('onGroupParticipantLeft', payload);
   }
 }
