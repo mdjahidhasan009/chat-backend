@@ -9,5 +9,5 @@ export interface IConversationsService {
   isCreated(
     userId: number,
     conversationId: number,
-  ): Promise<boolean | undefined>;
+  ): Promise<Conversation | undefined>;
 }
