@@ -1,5 +1,5 @@
 import { Services } from './../utils/constants';
-import { Body, Controller, Inject, Param, ParseIntPipe, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, ParseIntPipe, Patch, Post, Delete } from "@nestjs/common";
 import { Routes } from "src/utils/constants";
 import { IFriendRequestService } from './friend-requests';
 import { AuthUser } from 'src/utils/decorators';
@@ -12,6 +12,11 @@ export class FriendRequestController {
     @Inject(Services.FRIENDS_REQUESTS_SERVICE)
     private readonly friendRequestService: IFriendRequestService,
   ) {}
+
+  @Get()
+  getFriendRequests(@AuthUser() user: User) {
+    return this.friendRequestService.getFriendRequests(user.id);
+  }
 
   @Post()
   createFriendRequest(
@@ -28,5 +33,13 @@ export class FriendRequestController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.friendRequestService.accept({ id, userId });
+  }
+
+  @Delete(':id/cancel')
+  cancelFriendRequest(
+    @AuthUser() { id: userId }: User,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.friendRequestService.cancel({ id, userId });
   }
 }
