@@ -14,5 +14,12 @@ import { GroupModule } from '../groups/group.module';
       useClass: GatewaySessionManager,
     },
   ],
+  exports: [
+    MessagingGateway,
+    {
+      provide: Services.GATEWAY_SESSION_MANAGER,
+      useClass: GatewaySessionManager,
+    },
+  ],
 })
 export class GatewayModule {}

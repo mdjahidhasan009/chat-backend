@@ -5,12 +5,14 @@ import { IFriendRequestService } from './friend-requests';
 import { AuthUser } from 'src/utils/decorators';
 import { User } from 'src/utils/typeorm';
 import { CreateFriendDto } from 'src/friends/dto/CreateFriend.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller(Routes.FRIEND_REQUESTS)
 export class FriendRequestController {
   constructor(
     @Inject(Services.FRIENDS_REQUESTS_SERVICE)
     private readonly friendRequestService: IFriendRequestService,
+    private event: EventEmitter2,
   ) {}
 
   @Get()
@@ -19,12 +21,14 @@ export class FriendRequestController {
   }
 
   @Post()
-  createFriendRequest(
+  async createFriendRequest(
     @AuthUser() user: User,
     @Body() { email }: CreateFriendDto
   ) {
     const params = { user, email };
-    return this.friendRequestService.create(params);
+    const friendRequest = await this.friendRequestService.create(params);
+    this.event.emit('friendrequest.create', friendRequest);
+    return friendRequest;
   }
 
   @Patch(':id/accept')
@@ -41,5 +45,13 @@ export class FriendRequestController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.friendRequestService.cancel({ id, userId });
+  }
+
+  @Patch(':id/refect')
+  rejectFriendRequest(
+    @AuthUser() { id: userId }: User,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.friendRequestService.reject({ id, userId });
   }
 }

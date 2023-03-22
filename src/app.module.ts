@@ -13,6 +13,7 @@ import { GroupModule } from './groups/group.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { FriendRequestsModule } from './friend-request/friend-requests.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { FriendRequestsModule } from './friend-request/friend-requests.module';
     MessagesModule,
     GatewayModule,
     GroupModule,
+    EventsModule,
     FriendRequestsModule,
     // ThrottlerModule.forRoot({
     //   ttl: 60,
