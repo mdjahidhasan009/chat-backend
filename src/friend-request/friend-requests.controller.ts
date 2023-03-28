@@ -1,11 +1,22 @@
-import { Services } from './../utils/constants';
-import { Body, Controller, Get, Inject, Param, ParseIntPipe, Patch, Post, Delete } from "@nestjs/common";
-import { Routes } from "src/utils/constants";
-import { IFriendRequestService } from './friend-requests';
-import { AuthUser } from 'src/utils/decorators';
-import { User } from 'src/utils/typeorm';
-import { CreateFriendDto } from 'src/friends/dto/CreateFriend.dto';
+
+
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Routes, Services } from '../utils/constants';
+import { AuthUser } from '../utils/decorators';
+import { User } from '../utils/typeorm';
+import { CreateFriendDto } from './dtos/CreateFriend.dto';
+import { IFriendRequestService } from './friend-requests';
 
 @Controller(Routes.FRIEND_REQUESTS)
 export class FriendRequestController {
@@ -23,7 +34,7 @@ export class FriendRequestController {
   @Post()
   async createFriendRequest(
     @AuthUser() user: User,
-    @Body() { email }: CreateFriendDto
+    @Body() { email }: CreateFriendDto,
   ) {
     const params = { user, email };
     const friendRequest = await this.friendRequestService.create(params);
@@ -47,7 +58,7 @@ export class FriendRequestController {
     return this.friendRequestService.cancel({ id, userId });
   }
 
-  @Patch(':id/refect')
+  @Patch(':id/reject')
   rejectFriendRequest(
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
