@@ -8,6 +8,7 @@ export enum Routes {
   GROUP_RECIPIENTS = 'groups/:id/recipients',
   FRIENDS = 'friends',
   FRIEND_REQUESTS = 'friends/requests',
+  EXISTS = 'exists',
 }
 
 export enum Services {
@@ -21,4 +22,16 @@ export enum Services {
   GROUP_RECIPIENTS = 'GROUP_RECIPIENTS_SERVICE',
   FRIENDS_SERVICE = 'FRIENDS_SERVICE',
   FRIENDS_REQUESTS_SERVICE = 'FRIEND_REQUEST_SERVICE',
+}
+
+export enum ServerEvents {
+  FRIEND_REQUEST_ACCEPTED = 'friendrequest.accepted',
+  FRIEND_REQUEST_REJECTED = 'friendrequest.rejected',
+  FRIEND_REQUEST_CANCELLED = 'friendrequest.cancelled',
+  FRIEND_REMOVED = 'friend.removed',
+}
+
+export enum WebsocketEvents {
+  FRIEND_REQUEST_ACCEPTED = 'onFriendRequestAccepted',
+  FRIEND_REQUEST_REJECTED = 'onFriendRequestRejected',
 }

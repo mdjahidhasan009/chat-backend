@@ -12,12 +12,14 @@ import {
   Post,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Routes, Services } from '../utils/constants';
+import { Routes, Services, ServerEvents } from '../utils/constants';
 import { AuthUser } from '../utils/decorators';
 import { User } from '../utils/typeorm';
 import { CreateFriendDto } from './dtos/CreateFriend.dto';
 import { IFriendRequestService } from './friend-requests';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle()
 @Controller(Routes.FRIEND_REQUESTS)
 export class FriendRequestController {
   constructor(
@@ -43,26 +45,32 @@ export class FriendRequestController {
   }
 
   @Patch(':id/accept')
-  acceptFriendRequest(
+  async acceptFriendRequest(
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.friendRequestService.accept({ id, userId });
+    const response = this.friendRequestService.accept({ id, userId });
+    this.event.emit(ServerEvents.FRIEND_REQUEST_ACCEPTED, response);
+    return response;
   }
 
   @Delete(':id/cancel')
-  cancelFriendRequest(
+  async cancelFriendRequest(
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.friendRequestService.cancel({ id, userId });
+    const response = this.friendRequestService.cancel({ id, userId });
+    this.event.emit('friendrequest.cancel', response);
+    return response;
   }
 
   @Patch(':id/reject')
-  rejectFriendRequest(
+  async rejectFriendRequest(
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.friendRequestService.reject({ id, userId });
+    const response = this.friendRequestService.reject({ id, userId });
+    this.event.emit(ServerEvents.FRIEND_REQUEST_REJECTED, response);
+    return response;
   }
 }

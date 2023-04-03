@@ -15,7 +15,9 @@ import { AuthUser } from '../utils/decorators';
 import { User } from '../utils/typeorm';
 import { IConversationsService } from './conversations';
 import { CreateConversationDto } from './dtos/CreateConversation.dto';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle()
 @Controller(Routes.CONVERSATIONS)
 @UseGuards(AuthenticatedGuard)
 export class ConversationsController {
@@ -24,6 +26,11 @@ export class ConversationsController {
     private readonly conversationsService: IConversationsService,
     private readonly events: EventEmitter2,
   ) {}
+
+  @Get('test/endpoint/check')
+  test() {
+    return;
+  }
 
   @Post()
   async createConversation(

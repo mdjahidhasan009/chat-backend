@@ -13,7 +13,9 @@ import { AuthUser } from '../../utils/decorators';
 import { User } from '../../utils/typeorm';
 import { AddGroupRecipientParams } from '../../utils/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle()
 @Controller(Routes.GROUP_RECIPIENTS)
 export class GroupRecipientsController {
   constructor(

@@ -1,3 +1,4 @@
+import { FriendsModule } from './../friends/friends.module';
 import { FriendRequest } from './../utils/typeorm/entities/FriendRequest';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +9,11 @@ import { Services } from '../utils/constants';
 import { FriendRequestService } from './friend-requests.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ Friend, FriendRequest ]), UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([ Friend, FriendRequest ]), 
+    UsersModule,
+    FriendsModule
+  ],
   controllers: [FriendRequestController],
   providers: [
     {

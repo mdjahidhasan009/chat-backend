@@ -14,6 +14,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { FriendRequestsModule } from './friend-request/friend-requests.module';
 import { EventsModule } from './events/events.module';
+import { ExistsModule } from './exists/exists.module';
 
 @Module({
   imports: [
@@ -38,18 +39,19 @@ import { EventsModule } from './events/events.module';
     GroupModule,
     EventsModule,
     FriendRequestsModule,
-    // ThrottlerModule.forRoot({
-    //   ttl: 60,
-    //   limit: 10,
-    // }),
+    ExistsModule,
+    ThrottlerModule.forRoot({
+      ttl: 30,
+      limit: 10,
+    }),
     EventEmitterModule.forRoot(),
   ],
   controllers: [],
   providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

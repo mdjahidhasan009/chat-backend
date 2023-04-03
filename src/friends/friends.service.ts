@@ -33,6 +33,22 @@ export class FriendsService implements IFriendsService {
 
     if (friend.receiver.id !== userId && friend.sender.id !== userId) throw new DeleteFriendException();
 
-    return this.friendsRepository.delete(id);
+    await this.friendsRepository.delete(id);
+    return friend;
+  }
+
+  isFriends(userOneId: number, userTwoId: number) {
+    return this.friendsRepository.findOne({
+      where: [
+        {
+          sender: { id: userOneId },
+          receiver: { id: userTwoId },
+        },
+        {
+          sender: { id: userTwoId },
+          receiver: { id: userOneId },
+        },
+      ],
+    });
   }
 }

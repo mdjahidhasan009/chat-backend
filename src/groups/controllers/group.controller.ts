@@ -6,7 +6,9 @@ import { CreateGroupDto } from '../dtos/CreateGroup.dto';
 import { User } from '../../utils/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {TransferOwnerDto} from "../dtos/TransferOwnerDto";
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle()
 @Controller(Routes.GROUPS)
 export class GroupController {
   constructor(

@@ -13,6 +13,7 @@ import { User } from '../../utils/typeorm';
 import { CreateMessageDto } from '../../messages/dtos/CreateMessage.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {EditMessageDto} from "../../messages/dtos/EditMessage.dto";
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @Controller(Routes.GROUP_MESSAGES)
 export class GroupMessageController {
@@ -22,6 +23,7 @@ export class GroupMessageController {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
+  @Throttle(5, 10)
   @Post()
   async createGroupMessage(
     @AuthUser() user: User,
@@ -38,6 +40,7 @@ export class GroupMessageController {
   }
 
   @Get()
+  @SkipThrottle()
   async getGroupMessages(
     @AuthUser() user: User,
     @Param('id', ParseIntPipe) id: number,
@@ -47,6 +50,7 @@ export class GroupMessageController {
   }
 
   @Delete(':messageId')
+  @SkipThrottle()
   async deleteGroupMessage(
     @AuthUser() user: User,
     @Param('id', ParseIntPipe) groupId: number,
@@ -66,6 +70,7 @@ export class GroupMessageController {
   }
 
   @Patch(':messageId')
+  @SkipThrottle()
   async editGroupMessage(
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) groupId: number,

@@ -1,3 +1,5 @@
+import { IFriendsService } from './../friends/friends';
+import { FriendAlreadyExists } from './../friends/exceptions/FriendAlreadyExists';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,6 +24,8 @@ export class FriendRequestService implements IFriendRequestService {
     private readonly friendRequestRepository: Repository<FriendRequest>,
     @Inject(Services.USERS)
     private readonly userService: IUserService,
+    @Inject(Services.FRIENDS_SERVICE)
+    private readonly friendsService: IFriendsService,
   ) {}
 
   getFriendRequests(id: number): Promise<FriendRequest[]> {
@@ -39,7 +43,8 @@ export class FriendRequestService implements IFriendRequestService {
     const friendRequest = await this.findById(id);
     if (!friendRequest) throw new FriendRequestNotFoundException();
     if (friendRequest.sender.id !== userId) throw new FriendRequestException();
-    return this.friendRequestRepository.delete(id);
+    await this.friendRequestRepository.delete(id);
+    return friendRequest;
   }
 
   async create({ user: sender, email }: CreateFriendParams) {
@@ -47,6 +52,12 @@ export class FriendRequestService implements IFriendRequestService {
     if (!receiver) throw new UserNotFoundException();
     const exists = await this.isPending(sender.id, receiver.id);
     if (exists) throw new FriendRequestPending();
+    if (receiver.id === sender.id) throw new FriendRequestException('Can not add yourself');
+    const isFriends = await this.friendsService.isFriends(
+      sender.id,
+      receiver.id,
+    );
+    if (isFriends) throw new FriendAlreadyExists();
     const friend = this.friendRequestRepository.create({
       sender,
       receiver,
@@ -63,12 +74,13 @@ export class FriendRequestService implements IFriendRequestService {
     if (friendRequest.receiver.id !== userId)
       throw new FriendRequestException();
     friendRequest.status = 'accepted';
-    await this.friendRequestRepository.save(friendRequest);
+    const updatedFriendRequest =  await this.friendRequestRepository.save(friendRequest);
     const newFriend = this.friendRepository.create({
       sender: friendRequest.sender,
       receiver: friendRequest.receiver,
     });
-    return this.friendRepository.save(newFriend);
+    const friend = await this.friendRepository.save(newFriend);
+    return { friend, friendRequest: updatedFriendRequest };
   }
 
   async reject({ id, userId }: CancelFriendRequestParams) {
