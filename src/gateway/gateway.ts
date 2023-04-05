@@ -1,29 +1,28 @@
-import { FriendsService } from './../friends/friends.service';
+import { Inject } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import {
-  ConnectedSocket,
-  MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  SubscribeMessage,
+  MessageBody,
+  OnGatewayConnection,
+  ConnectedSocket,
+  OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { OnEvent } from '@nestjs/event-emitter';
-import { IGatewaySessionManager } from './gateway.session';
+import { IConversationsService } from '../conversations/conversations';
+import { IFriendsService } from '../friends/friends';
+import { IGroupService } from '../groups/interfaces/group';
 import { Services } from '../utils/constants';
-import { Inject } from '@nestjs/common';
 import { AuthenticatedSocket } from '../utils/interfaces';
+import { Conversation, Group, GroupMessage, Message } from '../utils/typeorm';
 import {
   AddGroupUserResponse,
   CreateGroupMessageResponse,
   CreateMessageResponse,
   RemoveGroupUserResponse,
 } from '../utils/types';
-import { Conversation, Group, GroupMessage, Message } from '../utils/typeorm';
-import { IConversationsService } from '../conversations/conversations';
-import { IGroupService } from '../groups/interfaces/group';
-import { IFriendsService } from '../friends/friends';
+import { IGatewaySessionManager } from './gateway.session';
 
 @WebSocketGateway({
   cors: {
@@ -74,7 +73,6 @@ export class MessagingGateway
       const socket = this.sessions.getUserSocket(user.id);
       socket ? onlineUsers.push(user) : offlineUsers.push(user);
     });
-
     socket.emit('onlineGroupUsersReceived', { onlineUsers, offlineUsers });
   }
 
@@ -87,7 +85,6 @@ export class MessagingGateway
   onConversationJoin(
     @MessageBody() data: any,
     @ConnectedSocket() client: AuthenticatedSocket,
-    ws: Socket,
   ) {
     client.join(`conversation-${data.conversationId}`);
     client.to(`conversation-${data.conversationId}`).emit('userJoin');
@@ -100,14 +97,6 @@ export class MessagingGateway
   ) {
     client.leave(`conversation-${data.conversationId}`);
     client.to(`conversation-${data.conversationId}`).emit('userLeave');
-  }
-
-  @SubscribeMessage('onTypingStart')
-  onTypingStart(
-    @MessageBody() data: any,
-    @ConnectedSocket() client: AuthenticatedSocket,
-  ) {
-    client.to(`conversation-${data.conversationId}`).emit('onTypingStart');
   }
 
   @SubscribeMessage('onGroupJoin')
@@ -125,7 +114,15 @@ export class MessagingGateway
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     client.leave(`group-${data.groupId}`);
-    client.to(`group-${data.groupId}`).emit('uerGroupLeave');
+    client.to(`group-${data.groupId}`).emit('userGroupLeave');
+  }
+
+  @SubscribeMessage('onTypingStart')
+  onTypingStart(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    client.to(`conversation-${data.conversationId}`).emit('onTypingStart');
   }
 
   @SubscribeMessage('onTypingStop')
@@ -148,8 +145,9 @@ export class MessagingGateway
       author.id === creator.id
         ? this.sessions.getUserSocket(recipient.id)
         : this.sessions.getUserSocket(creator.id);
-    if (recipientSocket) recipientSocket.emit('onMessage', payload);
+
     if (authorSocket) authorSocket.emit('onMessage', payload);
+    if (recipientSocket) recipientSocket.emit('onMessage', payload);
   }
 
   @OnEvent('conversation.create')
@@ -159,7 +157,7 @@ export class MessagingGateway
   }
 
   @OnEvent('message.delete')
-  async handleMessageDeleteEvent(payload) {
+  async handleMessageDelete(payload) {
     const conversation = await this.conversationService.findConversationById(
       payload.conversationId,
     );
@@ -227,14 +225,16 @@ export class MessagingGateway
     const onlineUsers = group.users
       .map((user) => this.sessions.getUserSocket(user.id) && user)
       .filter((user) => user);
+    // this.server.to(ROOM_NAME).emit('onlineGroupUsersReceived', { onlineUsers });
   }
 
-  @OnEvent('group.message.update')
+  @OnEvent('group.owner.update')
   handleGroupOwnerUpdate(payload: Group) {
     const ROOM_NAME = `group-${payload.id}`;
     const newOwnerSocket = this.sessions.getUserSocket(payload.owner.id);
     const { rooms } = this.server.sockets.adapter;
     const socketsInRoom = rooms.get(ROOM_NAME);
+    // Check if the new owner is in the group (room)
     this.server.to(ROOM_NAME).emit('onGroupOwnerUpdate', payload);
     if (newOwnerSocket && !socketsInRoom.has(newOwnerSocket.id)) {
       newOwnerSocket.emit('onGroupOwnerUpdate', payload);
@@ -247,7 +247,6 @@ export class MessagingGateway
     const { rooms } = this.server.sockets.adapter;
     const socketsInRoom = rooms.get(ROOM_NAME);
     const leftUserSocket = this.sessions.getUserSocket(payload.userId);
-
     /**
      * If socketsInRoom is undefined, this means that there is
      * no one connected to the room. So just emit the event for
@@ -257,12 +256,10 @@ export class MessagingGateway
       if (socketsInRoom.has(leftUserSocket.id)) {
         return this.server
           .to(ROOM_NAME)
-          .emit('onGroupRecipientLeft', payload);
+          .emit('onGroupParticipantLeft', payload);
       } else {
-        leftUserSocket.emit('onGroupUserLeave', payload);
-        this.server
-          .to(ROOM_NAME)
-          .emit('onGroupRecipientLeft', payload);
+        leftUserSocket.emit('onGroupParticipantLeft', payload);
+        this.server.to(ROOM_NAME).emit('onGroupParticipantLeft', payload);
         return;
       }
     }
@@ -274,16 +271,17 @@ export class MessagingGateway
   @SubscribeMessage('getOnlineFriends')
   async handleFriendListRetrieve(
     @MessageBody() data: any,
-    @ConnectedSocket() socket: AuthenticatedSocket
+    @ConnectedSocket() socket: AuthenticatedSocket,
   ) {
     const { user } = socket;
-    if(user) {
+    if (user) {
       const friends = await this.friendsService.getFriends(user.id);
-      const onlineFriends = friends.filter((friend) => this.sessions.getUserSocket(
-        user.id === friend.receiver.id
-          ? friend.sender.id
-          : friend.receiver.id,
-        )
+      const onlineFriends = friends.filter((friend) =>
+        this.sessions.getUserSocket(
+          user.id === friend.receiver.id
+            ? friend.sender.id
+            : friend.receiver.id,
+        ),
       );
       socket.emit('getOnlineFriends', onlineFriends);
     }

@@ -7,8 +7,8 @@ import * as passport from 'passport';
 import { TypeormStore } from 'connect-typeorm';
 import { Session } from './utils/typeorm';
 import { getRepository } from 'typeorm';
-import { WebsocketAdapter } from "./gateway/getway.adapter";
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { WebsocketAdapter } from './gateway/getway.adapter';
 
 async function bootstrap() {
   const { PORT, COOKIE_SECRET } = process.env;
@@ -40,7 +40,7 @@ async function bootstrap() {
   try {
     await app.listen(PORT, () => console.log(`Running on Port ${PORT}`));
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 bootstrap();

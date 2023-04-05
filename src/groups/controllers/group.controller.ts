@@ -18,7 +18,7 @@ export class GroupController {
 
   @Post()
   async createGroup(@AuthUser() user: User, @Body() payload: CreateGroupDto) {
-    const group = this.groupService.createGroup({
+    const group = await this.groupService.createGroup({
       ...payload,
       creator: user,
     });

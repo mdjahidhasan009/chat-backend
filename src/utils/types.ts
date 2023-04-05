@@ -2,20 +2,21 @@ import { Conversation, Friend, FriendRequest, Group, GroupMessage, Message, User
 import { Request } from 'express';
 
 export type CreateUserDetails = {
-  email: string;
+  username: string;
   password: string;
   firstName: string;
   lastName: string;
 };
 
 export type ValidateUserDetails = {
-  email: string;
+  username: string;
   password: string;
 };
 
 export type FindUserParams = Partial<{
   id: number;
   email: string;
+  username: string;
 }>;
 
 export type FindUserOptions = Partial<{
@@ -23,7 +24,7 @@ export type FindUserOptions = Partial<{
 }>;
 
 export type CreateConversationParams = {
-  email: string;
+  username: string;
   message: string;
 };
 
@@ -101,7 +102,7 @@ export type DeleteGroupMessageParams = {
 
 export type AddGroupRecipientParams = {
   id: number;
-  email: string;
+  username: string;
   userId: number;
 };
 
@@ -144,7 +145,7 @@ export type CheckUserGroupParams = {
 
 export type CreateFriendParams = {
   user: User;
-  email: string;
+  username: string;
 };
 
 export type FriendStatus = 'accepted' | 'pending' | 'blocked';

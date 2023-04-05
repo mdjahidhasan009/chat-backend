@@ -1,19 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IGroupService } from '../interfaces/group';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Group } from '../../utils/typeorm';
 import { Repository } from 'typeorm';
-import { Services } from '../../utils/constants';
+import { UserNotFoundException } from '../../users/exceptions/UserNotFound';
 import { IUserService } from '../../users/user';
+import { Services } from '../../utils/constants';
+import { Group, User } from '../../utils/typeorm';
 import {
   AccessParams,
+  CheckUserGroupParams,
   CreateGroupParams,
   FetchGroupsParams,
   TransferOwnerParams,
 } from '../../utils/types';
 import { GroupNotFoundException } from '../exceptions/GroupNotFound';
 import { GroupOwnerTransferException } from '../exceptions/GroupOwnerTransfer';
-import {UserNotFoundException} from "../../users/exceptions/UserNotFound";
+import { IGroupService } from '../interfaces/group';
 
 @Injectable()
 export class GroupService implements IGroupService {
@@ -26,8 +27,8 @@ export class GroupService implements IGroupService {
 
   async createGroup(params: CreateGroupParams) {
     const { creator, title } = params;
-    const usersPromise = params.users.map((email) =>
-      this.userService.findUser({ email }),
+    const usersPromise = params.users.map((username) =>
+      this.userService.findUser({ username }),
     );
     const users = (await Promise.all(usersPromise)).filter((user) => user);
     users.push(creator);
@@ -46,6 +47,7 @@ export class GroupService implements IGroupService {
       .leftJoinAndSelect('group.owner', 'owner')
       .getMany();
   }
+
   findGroupById(id: number): Promise<Group> {
     return this.groupRepository.findOne({
       where: { id },
@@ -57,7 +59,7 @@ export class GroupService implements IGroupService {
     return this.groupRepository.save(group);
   }
 
-  async hasAccess({ id, userId }: AccessParams) {
+  async hasAccess({ id, userId }: AccessParams): Promise<User | undefined> {
     const group = await this.findGroupById(id);
     if (!group) throw new GroupNotFoundException();
     return group.users.find((user) => user.id === userId);

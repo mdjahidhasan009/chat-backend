@@ -9,13 +9,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { instanceToPlain } from 'class-transformer';
 import { Request, Response } from 'express';
+import { IUserService } from '../users/user';
 import { Routes, Services } from '../utils/constants';
 import { IAuthService } from './auth';
 import { CreateUserDto } from './dtos/CreateUser.dto';
-import { IUserService } from '../users/user';
-import { instanceToPlain } from 'class-transformer';
 import { AuthenticatedGuard, LocalAuthGuard } from './utils/Guards';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller(Routes.AUTH)
 export class AuthController {
@@ -24,14 +25,16 @@ export class AuthController {
     @Inject(Services.USERS) private userService: IUserService,
   ) {}
 
+  // @Throttle(1, 60)
   @Post('register')
-  registerUser(@Body() createUserDto: CreateUserDto) {
-    return instanceToPlain(this.userService.createUser(createUserDto));
+  async registerUser(@Body() createUserDto: CreateUserDto) {
+    return instanceToPlain(await this.userService.createUser(createUserDto));
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Res() res: Response) {
+    console.log(res);
     return res.send(HttpStatus.OK);
   }
 

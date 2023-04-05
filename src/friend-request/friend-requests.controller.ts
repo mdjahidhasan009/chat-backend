@@ -17,7 +17,7 @@ import { AuthUser } from '../utils/decorators';
 import { User } from '../utils/typeorm';
 import { CreateFriendDto } from './dtos/CreateFriend.dto';
 import { IFriendRequestService } from './friend-requests';
-import { SkipThrottle } from '@nestjs/throttler';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @SkipThrottle()
 @Controller(Routes.FRIEND_REQUESTS)
@@ -33,17 +33,19 @@ export class FriendRequestController {
     return this.friendRequestService.getFriendRequests(user.id);
   }
 
+  @Throttle(3, 10)
   @Post()
   async createFriendRequest(
     @AuthUser() user: User,
-    @Body() { email }: CreateFriendDto,
+    @Body() { username }: CreateFriendDto,
   ) {
-    const params = { user, email };
+    const params = { user, username };
     const friendRequest = await this.friendRequestService.create(params);
     this.event.emit('friendrequest.create', friendRequest);
     return friendRequest;
   }
 
+  @Throttle(3, 10)
   @Patch(':id/accept')
   async acceptFriendRequest(
     @AuthUser() { id: userId }: User,
@@ -64,6 +66,7 @@ export class FriendRequestController {
     return response;
   }
 
+  @Throttle(3, 10)
   @Patch(':id/reject')
   async rejectFriendRequest(
     @AuthUser() { id: userId }: User,

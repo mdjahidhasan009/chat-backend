@@ -6,9 +6,11 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  OneToOne
 } from 'typeorm';
 import { Message } from './Message';
 import { Group } from './Group';
+import { Profile } from './Profile';
 
 @Entity({ name: 'users' })
 export class User {
@@ -16,6 +18,9 @@ export class User {
   id: number;
 
   @Column({ unique: true })
+  username: string;
+
+  @Column({ nullable: true })
   email: string;
 
   @Column()
@@ -34,4 +39,8 @@ export class User {
 
   @ManyToMany(() => Group, (group) => group.users)
   groups: Group[];
+
+  @OneToOne(() => Profile)
+  @JoinColumn()
+  profile: Profile;
 }

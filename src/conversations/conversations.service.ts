@@ -54,9 +54,9 @@ export class ConversationsService implements IConversationsService {
   }
 
   async createConversation(user: User, params: CreateConversationParams) {
-    const { email, message: content } = params;
+    const { username, message: content } = params;
 
-    const recipient = await this.userService.findUser({ email });
+    const recipient = await this.userService.findUser({ username });
 
     if (!recipient)
       throw new HttpException('Recipient not found', HttpStatus.BAD_REQUEST);

@@ -1,15 +1,16 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { IGroupMessagesService } from '../interfaces/group-messages';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Group, GroupMessage, Message } from '../../utils/typeorm';
+import { instanceToPlain } from 'class-transformer';
 import { Repository } from 'typeorm';
+import { IGroupService } from '../interfaces/group';
+import { Services } from '../../utils/constants';
+import { Group, GroupMessage } from '../../utils/typeorm';
 import {
   CreateGroupMessageParams,
-  DeleteGroupMessageParams, EditGroupMessageParams,
+  DeleteGroupMessageParams,
+  EditGroupMessageParams,
 } from '../../utils/types';
-import { Services } from '../../utils/constants';
-import { IGroupService } from '../interfaces/group';
-import { instanceToPlain } from 'class-transformer';
+import { IGroupMessagesService } from '../interfaces/group-messages';
 
 @Injectable()
 export class GroupMessageService implements IGroupMessagesService {
@@ -28,13 +29,11 @@ export class GroupMessageService implements IGroupMessagesService {
   }: CreateGroupMessageParams) {
     const { content, author } = params;
     const group = await this.groupService.findGroupById(id);
-    if (!group) {
+    if (!group)
       throw new HttpException('No Group Found', HttpStatus.BAD_REQUEST);
-    }
-    const findUser = group.users.find((user) => user.id === author.id);
-    if (!findUser) {
+    const findUser = group.users.find((u) => u.id === author.id);
+    if (!findUser)
       throw new HttpException('User not in group', HttpStatus.BAD_REQUEST);
-    }
     const groupMessage = this.groupMessageRepository.create({
       content,
       group,
@@ -62,7 +61,7 @@ export class GroupMessageService implements IGroupMessagesService {
       .where('group.id = :groupId', { groupId: params.groupId })
       .leftJoinAndSelect('group.lastMessageSent', 'lastMessageSent')
       .leftJoinAndSelect('group.messages', 'messages')
-      .orderBy('message.createdAt', 'DESC')
+      .orderBy('messages.createdAt', 'DESC')
       .limit(5)
       .getOne();
 
@@ -73,6 +72,7 @@ export class GroupMessageService implements IGroupMessagesService {
       author: { id: params.userId },
       group: { id: params.groupId },
     });
+
     if (!message)
       throw new HttpException('Cannot delete message', HttpStatus.BAD_REQUEST);
 

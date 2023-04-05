@@ -6,6 +6,7 @@ import { Message } from './entities/Message';
 import { Group } from './entities/Group';
 import { GroupMessage } from './entities/GroupMessage';
 import { FriendRequest } from './entities/FriendRequest';
+import { Profile } from './entities/Profile';
 
 const entities = [
   User, 
@@ -16,6 +17,7 @@ const entities = [
   GroupMessage,
   Friend,
   FriendRequest,
+  Profile
 ];
 
 export default entities;
@@ -28,6 +30,7 @@ export {
   Group, 
   GroupMessage, 
   Friend, 
-  FriendRequest 
+  FriendRequest ,
+  Profile
 };
 ////TODO: Have to upgrade to datasource means latest version

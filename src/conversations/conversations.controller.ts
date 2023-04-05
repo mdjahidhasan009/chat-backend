@@ -37,7 +37,6 @@ export class ConversationsController {
     @AuthUser() user: User,
     @Body() createConversationPayload: CreateConversationDto,
   ) {
-    console.log('createConversation');
     const conversation = await this.conversationsService.createConversation(
       user,
       createConversationPayload,

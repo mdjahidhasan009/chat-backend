@@ -41,7 +41,7 @@ import { ExistsModule } from './exists/exists.module';
     FriendRequestsModule,
     ExistsModule,
     ThrottlerModule.forRoot({
-      ttl: 30,
+      ttl: 10,
       limit: 10,
     }),
     EventEmitterModule.forRoot(),

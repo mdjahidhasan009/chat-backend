@@ -1,14 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { IMessageService } from './message';
-import { Conversation, Message, User } from '../utils/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { instanceToPlain } from 'class-transformer';
+import { Repository } from 'typeorm';
+import { Conversation, Message } from '../utils/typeorm';
 import {
   CreateMessageParams,
   DeleteMessageParams,
   EditMessageParams,
 } from '../utils/types';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { instanceToPlain } from 'class-transformer';
+import { IMessageService } from './message';
 
 @Injectable()
 export class MessageService implements IMessageService {
@@ -18,21 +18,16 @@ export class MessageService implements IMessageService {
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
   ) {}
-
   async createMessage({ user, content, conversationId }: CreateMessageParams) {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
       relations: ['creator', 'recipient', 'lastMessageSent'],
     });
-    if (!conversation) {
+    if (!conversation)
       throw new HttpException('Conversation not found', HttpStatus.BAD_REQUEST);
-    }
     const { creator, recipient } = conversation;
-    if (creator.id === user.id && recipient.id === user.id)
+    if (creator.id !== user.id && recipient.id !== user.id)
       throw new HttpException('Cannot Create Message', HttpStatus.FORBIDDEN);
-
-    // conversation.creator = instanceToPlain(conversation.creator) as User;
-    // conversation.recipient = instanceToPlain(conversation.recipient) as User;
     const message = this.messageRepository.create({
       content,
       conversation,
@@ -48,15 +43,9 @@ export class MessageService implements IMessageService {
 
   getMessagesByConversationId(conversationId: number): Promise<Message[]> {
     return this.messageRepository.find({
-      where: {
-        conversation: {
-          id: conversationId,
-        },
-      },
-      order: {
-        createdAt: 'DESC',
-      },
       relations: ['author'],
+      where: { conversation: { id: conversationId } },
+      order: { createdAt: 'DESC' },
     });
   }
 
@@ -66,7 +55,7 @@ export class MessageService implements IMessageService {
       .where('id = :conversationId', { conversationId: params.conversationId })
       .leftJoinAndSelect('conversation.lastMessageSent', 'lastMessageSent')
       .leftJoinAndSelect('conversation.messages', 'message')
-      .where('conversation.id === :conversationId', {
+      .where('conversation.id = :conversationId', {
         conversationId: params.conversationId,
       })
       .orderBy('message.createdAt', 'DESC')
@@ -81,14 +70,12 @@ export class MessageService implements IMessageService {
       author: { id: params.userId },
       conversation: { id: params.conversationId },
     });
-
-    if (!message) {
+    if (!message)
       throw new HttpException('Cannot delete message', HttpStatus.BAD_REQUEST);
-    }
     if (conversation.lastMessageSent.id !== message.id)
       return this.messageRepository.delete({ id: message.id });
 
-    //Delete Last Message
+    // Deleting Last Message
     const size = conversation.messages.length;
     const SECOND_MESSAGE_INDEX = 1;
     if (size <= 1) {
