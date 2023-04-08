@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
 import { Request, Response } from 'express';
-import { IUserService } from '../users/user';
+import { IUserService } from '../users/interfaces/user';
 import { Routes, Services } from '../utils/constants';
 import { IAuthService } from './auth';
 import { CreateUserDto } from './dtos/CreateUser.dto';
@@ -40,7 +40,7 @@ export class AuthController {
 
   @Get('status')
   @UseGuards(AuthenticatedGuard)
-  status(@Req() req: Request, @Res() res: Response) {
+  async status(@Req() req: Request, @Res() res: Response) {
     res.send(req.user);
   }
 

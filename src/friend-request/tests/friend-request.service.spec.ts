@@ -1,5 +1,5 @@
 import { FriendRequestNotFoundException } from './../exceptions/FriendRequestNotFound';
-import { IUserService } from '../../users/user';
+import { IUserService } from '../../users/interfaces/user';
 import { Test } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { Friend, FriendRequest } from '../../utils/typeorm';

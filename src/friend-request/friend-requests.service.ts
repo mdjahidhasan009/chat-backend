@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserNotFoundException } from '../users/exceptions/UserNotFound';
-import { IUserService } from '../users/user';
+import { IUserService } from '../users/interfaces/user';
 import { Services } from '../utils/constants';
 import { FriendRequest } from '../utils/typeorm';
 import { Friend } from '../utils/typeorm/entities/Friend';

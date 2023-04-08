@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Services } from '../../utils/constants';
-import { IUserService } from '../../users/user';
+import { IUserService } from '../../users/interfaces/user';
 import { IGroupRecipientService } from '../interfaces/group-recipient';
 import { IGroupService } from '../interfaces/group';
 import {

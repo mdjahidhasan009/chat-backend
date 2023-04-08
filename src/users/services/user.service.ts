@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { hashPassword } from '../utils/helpers';
-import { User } from '../utils/typeorm';
-import {CreateUserDetails, FindUserOptions, FindUserParams} from '../utils/types';
-import { IUserService } from './user';
+import { hashPassword } from '../../utils/helpers';
+import { User } from '../../utils/typeorm';
+import {CreateUserDetails, FindUserOptions, FindUserParams} from '../../utils/types';
+import { IUserService } from '../interfaces/user';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -38,6 +38,7 @@ export class UserService implements IUserService {
     const selectionsWithPassword: (keyof User)[] = [...selections, 'password'];
     return this.userRepository.findOne(params, {
       select: options?.selectAll ? selectionsWithPassword : selections,
+      relations: ['profile']
     });
   }
 

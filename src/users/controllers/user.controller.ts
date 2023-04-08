@@ -10,11 +10,11 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { Routes, Services } from '../utils/constants';
-import { IUserService } from './user';
+import { Routes, Services } from '../../utils/constants';
+import { IUserService } from '../interfaces/user';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UserProfileDto } from './dtos/UserProfile.dto';
-import { UserAlreadyExists } from './exceptions/UserAlreadyExists';
+import { UserProfileDto } from '../dtos/UserProfile.dto';
+import { UserAlreadyExists } from '../exceptions/UserAlreadyExists';
 
 @Controller(Routes.USERS)
 export class UsersController {
