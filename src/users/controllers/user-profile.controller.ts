@@ -25,6 +25,6 @@ export class UserProfilesController {
     updateUserProfileDto.about && (params.about = updateUserProfileDto.about);
     files.banner && (params.banner = files.banner[0]);
     files.avatar && (params.avatar = files.avatar[0]);
-    return await this.userProfileService.updateProfile(user, params);
+    return this.userProfileService.createProfileOrUpdate(user, params);
   } 
 }
