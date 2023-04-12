@@ -1,3 +1,4 @@
+import { FriendsModule } from './../friends/friends.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from '../users/users.module';
@@ -9,7 +10,11 @@ import { isAuthorized } from '../utils/helpers';
 import { ConversationMiddleware } from './middlewares/conversation.middleware';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Conversation, Message]), UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([Conversation, Message]),
+    UsersModule,
+    FriendsModule,
+  ],
   controllers: [ConversationsController],
   providers: [
     {

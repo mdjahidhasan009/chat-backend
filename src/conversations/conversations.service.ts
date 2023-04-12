@@ -1,3 +1,5 @@
+import { FriendNotFoundException } from './../friends/exceptions/FriendNotFound';
+import { IFriendsService } from './../friends/friends';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,6 +14,9 @@ import {
 } from '../utils/types';
 import { IConversationsService } from './conversations';
 import { ConversationNotFoundException } from './exceptions/ConversationNotFound';
+import { UserNotFoundException } from 'src/users/exceptions/UserNotFound';
+import { CreateConversationException } from './exceptions/CreateConversation';
+import { ConversationExistsException } from './exceptions/ConversationExists';
 
 @Injectable()
 export class ConversationsService implements IConversationsService {
@@ -22,6 +27,8 @@ export class ConversationsService implements IConversationsService {
     private readonly messageRepository: Repository<Message>,
     @Inject(Services.USERS)
     private readonly userService: IUserService,
+    @Inject(Services.FRIENDS_SERVICE)
+    private readonly friendsService: IFriendsService,
   ) {}
 
   async getConversations(id: number): Promise<Conversation[]> {
@@ -66,49 +73,34 @@ export class ConversationsService implements IConversationsService {
     });
   }
 
-  async createConversation(user: User, params: CreateConversationParams) {
+  async createConversation(creator: User, params: CreateConversationParams) {
     const { username, message: content } = params;
     const recipient = await this.userService.findUser({ username });
-    if (!recipient)
-      throw new HttpException('Recipient not found', HttpStatus.BAD_REQUEST);
-    // If user is not friends with that user, throw error.
-    if (user.id === recipient.id)
-      throw new HttpException(
-        'Cannot Create Conversation',
-        HttpStatus.BAD_REQUEST,
-      );
-    const existingConversation = await this.isCreated(user.id, recipient.id);
-    if (existingConversation)
-      throw new HttpException('Conversation exists', HttpStatus.CONFLICT);
-    const conversation = this.conversationRepository.create({
-      creator: user,
-      recipient: recipient,
-    });
-    const savedConversation = await this.conversationRepository.save(
-      conversation,
-    );
-    const messageParams = { content, conversation, author: user };
-    const message = this.messageRepository.create(messageParams);
-    const savedMessage = await this.messageRepository.save(message);
-    return savedConversation;
+    if (!recipient) throw new UserNotFoundException();
+    if (creator.id === recipient.id)
+      throw new CreateConversationException('Cannot create Conversation with yourself');
+    const isFriends = await this.friendsService.isFriends(creator.id, recipient.id);
+    if (!isFriends) throw new FriendNotFoundException();
+    const exists = await this.isCreated(creator.id, recipient.id);
+    if (exists) throw new ConversationExistsException();
+    const newConversation = this.conversationRepository.create({ creator, recipient });
+    const conversation = await this.conversationRepository.save(newConversation);
+    const newMessage = this.messageRepository.create({ content, conversation, author: creator });
+    await this.messageRepository.save(newMessage);
+    return conversation;
   }
 
   async hasAccess({ id, userId }: AccessParams) {
     const conversation = await this.findById(id);
     if (!conversation) throw new ConversationNotFoundException();
-    return (
-      conversation.creator.id === userId || conversation.recipient.id === userId
-    );
+    return conversation.creator.id === userId || conversation.recipient.id === userId;
   }
 
   save(conversation: Conversation): Promise<Conversation> {
     return this.conversationRepository.save(conversation);
   }
 
-  getMessages({
-    id,
-    limit,
-  }: GetConversationMessagesParams): Promise<Conversation> {
+  getMessages({ id, limit }: GetConversationMessagesParams): Promise<Conversation> {
     return this.conversationRepository
       .createQueryBuilder('conversation')
       .where('id = :id', { id })
