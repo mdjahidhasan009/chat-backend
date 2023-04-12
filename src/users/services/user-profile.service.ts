@@ -1,4 +1,4 @@
-import { IImageStorage } from './../../image-storage/image-storage';
+import { IImageStorageService } from './../../image-storage/image-storage';
 import { generateUUIDV4 } from './../../utils/helpers';
 import { Services } from './../../utils/constants';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,7 +17,7 @@ export class UserProfileService implements IUserProfile {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @Inject(Services.IMAGE_UPLOAD_SERVICE)
-    private readonly imageStorageService: IImageStorage,
+    private readonly imageStorageService: IImageStorageService,
   ) {}
 
   createProfile() {
@@ -44,13 +44,13 @@ export class UserProfileService implements IUserProfile {
 
   async updateBanner(file: Express.Multer.File) {
     const key = generateUUIDV4();
-    await this.imageStorageService.uploadBanner({ key, file });
+    await this.imageStorageService.upload({ key, file });
     return key;
   }
 
   async updateAvatar(file: Express.Multer.File) {
     const key = generateUUIDV4();
-    await this.imageStorageService.uploadBanner({ key, file });
+    await this.imageStorageService.upload({ key, file });
     return key;
   }
 }

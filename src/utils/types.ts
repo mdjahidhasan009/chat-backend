@@ -1,5 +1,6 @@
-import { Conversation, Friend, FriendRequest, Group, GroupMessage, Message, User } from './typeorm';
+import { Conversation, Friend, FriendRequest, Group, GroupMessage, Message, User, MessageAttachment } from './typeorm';
 import { Request } from 'express';
+import { GroupMessageAttachment } from './typeorm/entities/GroupMessageAttachment';
 
 export type CreateUserDetails = {
   username: string;
@@ -43,8 +44,9 @@ export type CreateParticipantParams = {
 };
 
 export type CreateMessageParams = {
-  content: string;
-  conversationId: number;
+  id: number;
+  content?: string;
+  attachments?: Attachment[];
   user: User;
 };
 
@@ -54,6 +56,12 @@ export type CreateMessageResponse = {
 };
 
 export type DeleteMessageParams = {
+  userId: number;
+  conversationId: number;
+  messageId: number;
+};
+
+export type FindMessageParams = {
   userId: number;
   conversationId: number;
   messageId: number;
@@ -84,9 +92,10 @@ export type FetchGroupsParams = {
 };
 
 export type CreateGroupMessageParams = {
-  groupId: number;
-  content: string;
   author: User;
+  attachments?: Attachment[];
+  content: string;
+  groupId: number;
 };
 
 export type CreateGroupMessageResponse = {
@@ -193,3 +202,26 @@ export type UploadImageParams = {
   key: string;
   file: Express.Multer.File;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface Attachment extends Express.Multer.File {}
+
+export type UploadMessageAttachmentParams = {
+  file: Attachment;
+  messageAttachment: MessageAttachment;
+};
+
+export type UploadGroupMessageAttachmentParams = {
+  file: Attachment;
+  messageAttachment: GroupMessageAttachment;
+};
+
+export type GetConversationMessagesParams = {
+  id: number;
+  limit: number;
+};
+
+export type UpdateConversationParams = Partial<{
+  id: number;
+  lastMessageSent: Message;
+}>;

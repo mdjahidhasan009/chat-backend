@@ -15,6 +15,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { FriendRequestsModule } from './friend-request/friend-requests.module';
 import { EventsModule } from './events/events.module';
 import { ExistsModule } from './exists/exists.module';
+import { MessageAttachmentsModule } from './message-attachments/message-attachments.module';
 
 let envFilePath = '.env.development';
 if (process.env.ENVIRONMENT === 'PRODUCTION') envFilePath = '.env.production';
@@ -43,11 +44,12 @@ if (process.env.ENVIRONMENT === 'PRODUCTION') envFilePath = '.env.production';
     EventsModule,
     FriendRequestsModule,
     ExistsModule,
+    MessageAttachmentsModule,
+    EventEmitterModule.forRoot(),
     ThrottlerModule.forRoot({
       ttl: 10,
       limit: 10,
     }),
-    EventEmitterModule.forRoot(),
   ],
   controllers: [],
   providers: [

@@ -1,8 +1,13 @@
-import { UploadImageParams } from "src/utils/types";
+import { GroupMessageAttachment, MessageAttachment } from '../utils/typeorm';
+import { UploadGroupMessageAttachmentParams, UploadMessageAttachmentParams } from './../utils/types';
+import { UploadImageParams } from "../utils/types";
 
-export interface IImageStorage {
-  uploadBanner(params: UploadImageParams);
-  uploadProfilePicture();
-  deleteBanner();
-  deleteProfilePicture();
+export interface IImageStorageService {
+  upload(params: UploadImageParams);
+  uploadMessageAttachment(
+    params: UploadMessageAttachmentParams,
+  ): Promise<MessageAttachment>;
+  uploadGroupMessageAttachment(
+    params: UploadGroupMessageAttachmentParams,
+  ): Promise<GroupMessageAttachment>;
 }

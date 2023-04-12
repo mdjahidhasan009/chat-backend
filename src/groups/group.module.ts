@@ -1,3 +1,4 @@
+import { MessageAttachmentsModule } from './../message-attachments/message-attachments.module';
 import {MiddlewareConsumer, Module, NestModule} from '@nestjs/common';
 import { Services } from '../utils/constants';
 import { GroupService } from './services/group.service';
@@ -13,7 +14,11 @@ import {isAuthorized} from "../utils/helpers";
 import {GroupMiddleware} from "./middlewares/group.middleware";
 
 @Module({
-  imports: [UsersModule, TypeOrmModule.forFeature([Group, GroupMessage])],
+  imports: [
+    UsersModule, 
+    MessageAttachmentsModule,
+    TypeOrmModule.forFeature([Group, GroupMessage])
+  ],
   controllers: [
     GroupController,
     GroupMessageController,

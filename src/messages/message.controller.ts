@@ -1,3 +1,6 @@
+import { Attachment } from './../utils/types';
+import { UploadedFiles } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
   Body,
   Controller,
@@ -8,6 +11,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Routes, Services } from '../utils/constants';
 import { IMessageService } from './message';
@@ -17,6 +21,7 @@ import { User } from '../utils/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EditMessageDto } from './dtos/EditMessage.dto';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
+import { EmptyMessageException } from './exceptions/EmptyMessage';
 
 @Controller(Routes.MESSAGES)
 export class MessageController {
@@ -26,13 +31,23 @@ export class MessageController {
   ) {}
 
   @Throttle(5, 10)
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      {
+        name: 'attachments',
+        maxCount: 5,
+      },
+    ]),
+  )
   @Post()
   async createMessage(
     @AuthUser() user: User,
-    @Param('id', ParseIntPipe) conversationId: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() { content }: CreateMessageDto,
+    @UploadedFiles() { attachments }: { attachments: Attachment[] },
   ) {
-    const params = { user, conversationId, content };
+    if (!attachments && !content) throw new EmptyMessageException();
+    const params = { user, id, content, attachments };
     const response = await this.messageService.createMessage(params);
     this.eventEmitter.emit('message.create', response);
     return;
@@ -54,16 +69,9 @@ export class MessageController {
     @Param('id', ParseIntPipe) conversationId: number,
     @Param('messageId', ParseIntPipe) messageId: number,
   ) {
-    await this.messageService.deleteMessage({
-      userId: user.id,
-      conversationId,
-      messageId,
-    });
-    this.eventEmitter.emit('message.delete', {
-      userId: user.id,
-      messageId,
-      conversationId,
-    });
+    const params = { userId: user.id, conversationId, messageId };
+    await this.messageService.deleteMessage(params);
+    this.eventEmitter.emit('message.delete', params);
     return { conversationId, messageId };
   }
 

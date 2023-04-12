@@ -1,13 +1,20 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { buildFindMessageParams } from './../utils/builders';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
 import { Repository } from 'typeorm';
+import { IConversationsService } from '../conversations/conversations';
+import { ConversationNotFoundException } from '../conversations/exceptions/ConversationNotFound';
+import { IMessageAttachmentsService } from '../message-attachments/message-attachments';
+import { Services } from '../utils/constants';
 import { Conversation, Message } from '../utils/typeorm';
 import {
   CreateMessageParams,
   DeleteMessageParams,
   EditMessageParams,
 } from '../utils/types';
+import { CannotCreateMessageException } from './exceptions/CannotCreateMessage';
+import { CannotDeleteMessage } from './exceptions/CannotDeleteMessage';
 import { IMessageService } from './message';
 
 @Injectable()
@@ -15,81 +22,70 @@ export class MessageService implements IMessageService {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
-    @InjectRepository(Conversation)
-    private readonly conversationRepository: Repository<Conversation>,
+    @Inject(Services.CONVERSATIONS)
+    private readonly conversationService: IConversationsService,
+    @Inject(Services.MESSAGE_ATTACHMENTS)
+    private readonly messageAttachmentsService: IMessageAttachmentsService,
   ) {}
-  async createMessage({ user, content, conversationId }: CreateMessageParams) {
-    const conversation = await this.conversationRepository.findOne({
-      where: { id: conversationId },
-      relations: ['creator', 'recipient', 'lastMessageSent'],
-    });
-    if (!conversation)
-      throw new HttpException('Conversation not found', HttpStatus.BAD_REQUEST);
+  async createMessage(params: CreateMessageParams) {
+    const { user, content, id } = params;
+    const conversation = await this.conversationService.findById(id);
+    if (!conversation) throw new ConversationNotFoundException();
     const { creator, recipient } = conversation;
     if (creator.id !== user.id && recipient.id !== user.id)
-      throw new HttpException('Cannot Create Message', HttpStatus.FORBIDDEN);
+      throw new CannotCreateMessageException();
     const message = this.messageRepository.create({
       content,
       conversation,
       author: instanceToPlain(user),
+      attachments: params.attachments
+        ? await this.messageAttachmentsService.create(params.attachments)
+        : [], 
     });
     const savedMessage = await this.messageRepository.save(message);
     conversation.lastMessageSent = savedMessage;
-    const updatedConversation = await this.conversationRepository.save(
-      conversation,
-    );
-    return { message: savedMessage, conversation: updatedConversation };
+    const updated = await this.conversationService.save(conversation);
+    return { message: savedMessage, conversation: updated };
   }
 
   getMessagesByConversationId(conversationId: number): Promise<Message[]> {
     return this.messageRepository.find({
-      relations: ['author'],
+      relations: ['author', 'attachments', 'author.profile'],
       where: { conversation: { id: conversationId } },
       order: { createdAt: 'DESC' },
     });
   }
 
   async deleteMessage(params: DeleteMessageParams) {
-    const conversation = await this.conversationRepository
-      .createQueryBuilder('conversation')
-      .where('id = :conversationId', { conversationId: params.conversationId })
-      .leftJoinAndSelect('conversation.lastMessageSent', 'lastMessageSent')
-      .leftJoinAndSelect('conversation.messages', 'message')
-      .where('conversation.id = :conversationId', {
-        conversationId: params.conversationId,
-      })
-      .orderBy('message.createdAt', 'DESC')
-      .limit(5)
-      .getOne();
-
-    if (!conversation)
-      throw new HttpException('Conversation not found', HttpStatus.BAD_REQUEST);
-
-    const message = await this.messageRepository.findOne({
-      id: params.messageId,
-      author: { id: params.userId },
-      conversation: { id: params.conversationId },
-    });
-    if (!message)
-      throw new HttpException('Cannot delete message', HttpStatus.BAD_REQUEST);
+    const { conversationId } = params;
+    const msgParams = { id: conversationId, limit: 5 };
+    const conversation = await this.conversationService.getMessages(msgParams);
+    if (!conversation) throw new ConversationNotFoundException();
+    const findMessageParams = buildFindMessageParams(params);
+    const message = await this.messageRepository.findOne(findMessageParams);
+    if (!message) throw new CannotDeleteMessage();
     if (conversation.lastMessageSent.id !== message.id)
       return this.messageRepository.delete({ id: message.id });
+    return this.deleteLastMessage(conversation, message);
+  }
 
-    // Deleting Last Message
+  async deleteLastMessage(conversation: Conversation, message: Message) {
     const size = conversation.messages.length;
     const SECOND_MESSAGE_INDEX = 1;
     if (size <= 1) {
-      await this.conversationRepository.update(
-        { id: params.conversationId },
-        { lastMessageSent: null },
-      );
+      console.log('Last Message Sent is deleted');
+      await this.conversationService.update({
+        id: conversation.id,
+        lastMessageSent: null,
+      });
       return this.messageRepository.delete({ id: message.id });
     } else {
+      console.log('There are more than 1 message');
       const newLastMessage = conversation.messages[SECOND_MESSAGE_INDEX];
-      await this.conversationRepository.update(
-        { id: params.conversationId },
-        { lastMessageSent: newLastMessage },
-      );
+      await this.conversationService.update({
+        id: conversation.id,
+        lastMessageSent: newLastMessage,
+      });
       return this.messageRepository.delete({ id: message.id });
     }
   }
