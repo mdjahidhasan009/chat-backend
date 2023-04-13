@@ -12,6 +12,7 @@ export enum Routes {
   FRIENDS = 'friends',
   FRIEND_REQUESTS = 'friends/requests',
   EXISTS = 'exists',
+  USER_PRESENCE = 'users/presence',
 }
 
 export enum Services {
@@ -29,6 +30,7 @@ export enum Services {
   SPACES_CLIENT = 'SPACES_CLIENT',
   IMAGE_UPLOAD_SERVICE = 'IMAGE_UPLOAD_SERVICE',
   MESSAGE_ATTACHMENTS = 'MESSAGE_ATTACHMENTS_SERVICE',
+  USER_PRESENCE = 'USER_PRESENCE_SERVICE',
 }
 
 export enum ServerEvents {

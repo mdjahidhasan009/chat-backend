@@ -1,3 +1,4 @@
+import { FriendsModule } from './../friends/friends.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConversationsModule } from '../conversations/conversations.module';
@@ -14,6 +15,7 @@ import { MessageService } from './message.service';
     ImageStorageModule,
     MessageAttachmentsModule,
     ConversationsModule,
+    FriendsModule,
   ],
   controllers: [MessageController],
   providers: [
