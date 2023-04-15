@@ -12,6 +12,7 @@ import { Message } from './Message';
 import { Group } from './Group';
 import { Profile } from './Profile';
 import { UserPresence } from './UserPresence';
+import { Peer } from './Peer';
 
 @Entity({ name: 'users' })
 export class User {
@@ -48,4 +49,10 @@ export class User {
   @OneToOne(() => UserPresence, { cascade: ['insert', 'update'] })
   @JoinColumn()
   presence: UserPresence;
+
+  @OneToOne(() => Peer, (peer) => peer.user, {
+    cascade: ['insert', 'remove', 'update'],
+  })
+  @JoinColumn()
+  peer: Peer;
 }

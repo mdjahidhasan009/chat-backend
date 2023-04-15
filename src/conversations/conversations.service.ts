@@ -37,6 +37,8 @@ export class ConversationsService implements IConversationsService {
       .leftJoinAndSelect('conversation.lastMessageSent', 'lastMessageSent')
       .leftJoinAndSelect('conversation.creator', 'creator')
       .leftJoinAndSelect('conversation.recipient', 'recipient')
+      .leftJoinAndSelect('creator.peer', 'creatorPeer')
+      .leftJoinAndSelect('recipient.peer', 'recipientPeer')
       .leftJoinAndSelect('creator.profile', 'creatorProfile')
       .leftJoinAndSelect('recipient.profile', 'recipientProfile')
       .where('creator.id = :id', { id })

@@ -23,6 +23,7 @@ import {
   RemoveGroupUserResponse,
 } from '../utils/types';
 import { IGatewaySessionManager } from './gateway.session';
+import { CreateCallDto } from './dto/CreateCallDto';
 
 @WebSocketGateway({
   cors: {
@@ -285,5 +286,46 @@ export class MessagingGateway
       );
       socket.emit('getOnlineFriends', onlineFriends);
     }
+  }
+
+  @SubscribeMessage('onVideoCallInitiate')
+  async handleVideoCall(
+    @MessageBody() data: CreateCallDto,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const caller = socket.user;
+    const receiverSocket = this.sessions.getUserSocket(data.recipientId);
+    if (!receiverSocket) socket.emit('onUserUnavailable');
+    receiverSocket.emit('onVideoCall', { ...data, caller });
+  }
+
+  @SubscribeMessage('videoCallAccepted')
+  async handleVideoCallAccepted(
+    @MessageBody() data,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const callerSocket = this.sessions.getUserSocket(data.caller.id);
+    const conversation = await this.conversationService.isCreated(
+      data.caller.id,
+      socket.user.id,
+    );
+    if (!conversation) return console.log('No conversation found');
+    if (callerSocket) {
+      const payload = { ...data, conversation, acceptor: socket.user };
+      callerSocket.emit('onVideoCallAccept', payload);
+      socket.emit('onVideoCallAccept', payload);
+    }
+  }
+
+  @SubscribeMessage('videoCallRejected')
+  async handleVideoCallRejected(
+    @MessageBody() data,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    console.log('inside videoCallRejected event');
+    const receiver = socket.user;
+    const callerSocket = this.sessions.getUserSocket(data.caller.id);
+    callerSocket && callerSocket.emit('onVideoCallRejected', { receiver });
+    socket.emit('onVideoCallRejected', { receiver });
   }
 }

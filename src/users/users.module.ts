@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { Services } from '../utils/constants';
 import { UserService } from './services/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Profile, User, UserPresence } from '../utils/typeorm';
+import { Profile, User, UserPresence, Peer } from '../utils/typeorm';
 import { UsersController } from './controllers/user.controller';
 import { UserProfileService } from './services/user-profile.service';
 import { UserProfilesController } from './controllers/user-profile.controller';
@@ -13,7 +13,7 @@ import { UserPresenceService } from './services/user-presence.service';
 @Module({
   // providers: [UserService],
   imports: [
-    TypeOrmModule.forFeature([User, UserPresence, Profile]), 
+    TypeOrmModule.forFeature([User, UserPresence, Profile, Peer]), 
     ImageStorageModule
   ],
   controllers: [
