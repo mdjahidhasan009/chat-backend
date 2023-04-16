@@ -21,6 +21,7 @@ import {
   CreateGroupMessageResponse,
   CreateMessageResponse,
   RemoveGroupUserResponse,
+  VideoCallHangupPayload,
 } from '../utils/types';
 import { IGatewaySessionManager } from './gateway.session';
 import { CreateCallDto } from './dto/CreateCallDto';
@@ -322,10 +323,24 @@ export class MessagingGateway
     @MessageBody() data,
     @ConnectedSocket() socket: AuthenticatedSocket,
   ) {
-    console.log('inside videoCallRejected event');
     const receiver = socket.user;
     const callerSocket = this.sessions.getUserSocket(data.caller.id);
     callerSocket && callerSocket.emit('onVideoCallRejected', { receiver });
     socket.emit('onVideoCallRejected', { receiver });
+  }
+
+  @SubscribeMessage('videoCallHangUp')
+  async handleVideoCallHangUp(
+    @MessageBody() { caller, receiver }: VideoCallHangupPayload,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    if (socket.user.id === caller.id) {
+      const receiverSocket = this.sessions.getUserSocket(receiver.id);
+      socket.emit('onVideoCallHangUp');
+      return receiverSocket && receiverSocket.emit('onVideoCallHangUp');
+    }
+    socket.emit('onVideoCallHangUp');
+    const callerSocket = this.sessions.getUserSocket(caller.id);
+    callerSocket && callerSocket.emit('onVideoCallHangUp');
   }
 }
