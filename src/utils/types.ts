@@ -233,7 +233,16 @@ export type UpdateStatusMessageParams = {
   statusMessage: string;
 };
 
-export type VideoCallHangupPayload = {
+export type CallHangUpPayload = {
   receiver: User;
+  caller: User;
+};
+
+export type VoiceCallPayload = {
+  conversationId: number;
+  recipientId: number;
+};
+
+export type CallAcceptedPayload = {
   caller: User;
 };
