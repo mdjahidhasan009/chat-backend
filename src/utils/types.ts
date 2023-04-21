@@ -246,3 +246,9 @@ export type VoiceCallPayload = {
 export type CallAcceptedPayload = {
   caller: User;
 };
+
+export type UpdateGroupDetailsParams = {
+  id: number;
+  title?: string;
+  avatar?: Attachment;
+};

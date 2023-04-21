@@ -1,12 +1,27 @@
-import { Routes, Services } from '../../utils/constants';
-import {Body, Controller, Get, Inject, Param, Patch, Post} from '@nestjs/common';
-import { IGroupService } from '../interfaces/group';
-import { AuthUser } from '../../utils/decorators';
-import { CreateGroupDto } from '../dtos/CreateGroup.dto';
-import { User } from '../../utils/typeorm';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import {TransferOwnerDto} from "../dtos/TransferOwnerDto";
+import { FileInterceptor } from '@nestjs/platform-express';
 import { SkipThrottle } from '@nestjs/throttler';
+import { Routes, Services } from '../../utils/constants';
+import { AuthUser } from '../../utils/decorators';
+import { User } from '../../utils/typeorm';
+import { Attachment } from '../../utils/types';
+import { CreateGroupDto } from '../dtos/CreateGroup.dto';
+import { UpdateGroupDetailsDto } from '../dtos/UpdateGroupDetails.dto';
+import { TransferOwnerDto } from '../dtos/TransferOwner.dto';
+
+import { IGroupService } from '../interfaces/group';
 
 @SkipThrottle()
 @Controller(Routes.GROUPS)
@@ -46,5 +61,15 @@ export class GroupController {
     const group = await this.groupService.transferGroupOwner(params);
     this.eventEmitter.emit('group.owner.update', group);
     return group;
+  }
+
+  @Patch(':id/details')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async updateGroupDetails(
+    @Body() { title }: UpdateGroupDetailsDto,
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() avatar: Attachment,
+  ) {
+    return this.groupService.updateDetails({ id, avatar, title });
   }
 }

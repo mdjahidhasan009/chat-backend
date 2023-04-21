@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Group, GroupMessage } from '../utils/typeorm';
 import { GroupMessageController } from './controllers/group-message.controller';
+import { ImageStorageModule } from '../image-storage/image-storage.module';
 import { GroupMessageService } from './services/group-message.service';
 import { GroupRecipientsController } from './controllers/group-recipients.controller';
 import { GroupRecipientService } from './services/group-recipient.service';
@@ -17,6 +18,7 @@ import {GroupMiddleware} from "./middlewares/group.middleware";
   imports: [
     UsersModule, 
     MessageAttachmentsModule,
+    ImageStorageModule,
     TypeOrmModule.forFeature([Group, GroupMessage])
   ],
   controllers: [
