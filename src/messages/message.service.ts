@@ -35,7 +35,10 @@ export class MessageService implements IMessageService {
     const conversation = await this.conversationService.findById(id);
     if (!conversation) throw new ConversationNotFoundException();
     const { creator, recipient } = conversation;
-    const isFriend = await this.friendsService.isFriends(creator.id, recipient.id);
+    const isFriend = await this.friendsService.isFriends(
+      creator.id,
+      recipient.id,
+    );
     if (creator.id !== user.id && recipient.id !== user.id)
       throw new CannotCreateMessageException();
     const message = this.messageRepository.create({
@@ -44,7 +47,7 @@ export class MessageService implements IMessageService {
       author: instanceToPlain(user),
       attachments: params.attachments
         ? await this.messageAttachmentsService.create(params.attachments)
-        : [], 
+        : [],
     });
     const savedMessage = await this.messageRepository.save(message);
     conversation.lastMessageSent = savedMessage;
@@ -52,7 +55,7 @@ export class MessageService implements IMessageService {
     return { message: savedMessage, conversation: updated };
   }
 
-  getMessagesByConversationId(conversationId: number): Promise<Message[]> {
+  getMessages(conversationId: number): Promise<Message[]> {
     return this.messageRepository.find({
       relations: ['author', 'attachments', 'author.profile'],
       where: { conversation: { id: conversationId } },
@@ -105,6 +108,7 @@ export class MessageService implements IMessageService {
         'conversation.creator',
         'conversation.recipient',
         'author',
+        'author.profile',
       ],
     });
     if (!messageDB)

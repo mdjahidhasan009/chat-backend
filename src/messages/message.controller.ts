@@ -59,7 +59,7 @@ export class MessageController {
     @AuthUser() user: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const messages = await this.messageService.getMessagesByConversationId(id);
+    const messages = await this.messageService.getMessages(id);
     return { id, messages };
   }
 

@@ -1,3 +1,4 @@
+import { AuthenticatedRequest } from './../utils/types';
 import {
   Body,
   Controller,
@@ -45,5 +46,10 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout() {}
+  @UseGuards(AuthenticatedGuard)
+  logout(@Req() req: AuthenticatedRequest, @Res() res: Response) {
+    req.logout((err) => {
+      return err ? res.send(400) : res.send(200);
+    });
+  }
 }
