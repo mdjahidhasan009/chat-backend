@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { hashPassword } from '../../utils/helpers';
 import { Peer, User } from '../../utils/typeorm';
-import {CreateUserDetails, FindUserOptions, FindUserParams} from '../../utils/types';
+import {
+  CreateUserDetails,
+  FindUserOptions,
+  FindUserParams,
+} from '../../utils/types';
 import { IUserService } from '../interfaces/user';
 
 @Injectable()
@@ -31,18 +35,18 @@ export class UserService implements IUserService {
     options?: FindUserOptions,
   ): Promise<User> {
     const selections: (keyof User)[] = [
-      'email', 
+      'email',
       'username',
-      'firstName', 
-      'lastName', 
+      'firstName',
+      'lastName',
       'id',
-      'profile',
-      'peer'
+      // 'profile',
+      // 'peer'
     ];
     const selectionsWithPassword: (keyof User)[] = [...selections, 'password'];
     return this.userRepository.findOne(params, {
       select: options?.selectAll ? selectionsWithPassword : selections,
-      relations: ['profile', 'presence']
+      relations: ['profile', 'presence', 'peer'],
     });
   }
 
@@ -57,11 +61,11 @@ export class UserService implements IUserService {
       .where(statement, { query: `%${query}%` })
       .limit(10)
       .select([
-        'user.firstName', 
-        'user.lastName', 
-        'user.username', 
+        'user.firstName',
+        'user.lastName',
+        'user.username',
         'user.id',
-        'user.profile'
+        'user.profile',
       ])
       .getMany();
   }
