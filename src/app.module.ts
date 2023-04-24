@@ -16,6 +16,7 @@ import { FriendRequestsModule } from './friend-request/friend-requests.module';
 import { EventsModule } from './events/events.module';
 import { ExistsModule } from './exists/exists.module';
 import { MessageAttachmentsModule } from './message-attachments/message-attachments.module';
+import { ThrottlerBehindProxyGuard } from './utils/throttler';
 
 let envFilePath = '.env.development';
 if (process.env.ENVIRONMENT === 'PRODUCTION') envFilePath = '.env.production';
@@ -55,7 +56,8 @@ if (process.env.ENVIRONMENT === 'PRODUCTION') envFilePath = '.env.production';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      // useClass: ThrottlerGuard,
+      useClass: ThrottlerBehindProxyGuard,
     },
   ],
 })
