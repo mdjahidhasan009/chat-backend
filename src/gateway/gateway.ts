@@ -32,7 +32,7 @@ import { CreateCallDto } from './dto/CreateCallDto';
   cors: {
     origin: [
       'http://localhost:3000', // Local development
-      'https://chat-frontend-ten-hazel.vercel.app', // Deployed frontend
+      `${process.env.FRONTEND_URL}`, // Deployed frontend
     ],
     credentials: true,
   },
