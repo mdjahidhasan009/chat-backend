@@ -30,7 +30,10 @@ import { CreateCallDto } from './dto/CreateCallDto';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3000'],
+    origin: [
+      'http://localhost:3000', // Local development
+      'https://chat-frontend-ten-hazel.vercel.app', // Deployed frontend
+    ],
     credentials: true,
   },
   pingInterval: 10000,

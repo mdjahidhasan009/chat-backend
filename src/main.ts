@@ -17,7 +17,13 @@ async function bootstrap() {
   const adapter = new WebsocketAdapter(app);
   app.useWebSocketAdapter(adapter);
   app.setGlobalPrefix('api');
-  app.enableCors({ origin: ['http://localhost:3000'], credentials: true });
+  app.enableCors({
+    origin: [
+      'http://localhost:3000', // Local development
+      'https://chat-frontend-ten-hazel.vercel.app', // Deployed frontend
+    ],
+    credentials: true, // Allow cookies to be sent
+  });
   app.useGlobalPipes(new ValidationPipe());
   app.set('trust proxy', 'loopback');
 
