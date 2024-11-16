@@ -37,7 +37,7 @@ async function bootstrap() {
         maxAge: 86400000, // 1 day
         httpOnly: true, // Prevent client-side JavaScript access
         secure: process.env.NODE_ENV === 'production', // Send only over HTTPS in production
-        sameSite: 'none', // Required for cross-origin cookies
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-origin cookies
       },
       store: new TypeormStore().connect(sessionRepository),
     }),
@@ -45,14 +45,6 @@ async function bootstrap() {
 
   app.use(passport.initialize());
   app.use(passport.session());
-
-  app.use((req, res, next) => {
-    console.log('Path:', req.path);
-    console.log('Session:', req.session);
-    console.log('User:', req.user);
-    console.log('Is Authenticated:', req.isAuthenticated());
-    next();
-  });
 
   try {
     await app.listen(PORT, () => {
