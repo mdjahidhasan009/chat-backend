@@ -37,6 +37,13 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  app.use((req, res, next) => {
+    console.log('Session:', req.session);
+    console.log('User:', req.user);
+    console.log('Is Authenticated:', req.isAuthenticated());
+    next();
+  });
+
   try {
     await app.listen(PORT, () => {
       console.log(`Running on Port ${PORT}`);
