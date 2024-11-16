@@ -36,8 +36,8 @@ async function bootstrap() {
       cookie: {
         maxAge: 86400000, // 1 day
         httpOnly: true, // Prevent client-side JavaScript access
-        secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-        sameSite: 'lax', // Adjust based on your frontend-backend interaction
+        secure: process.env.NODE_ENV === 'production', // Send only over HTTPS in production
+        sameSite: 'none', // Required for cross-origin cookies
       },
       store: new TypeormStore().connect(sessionRepository),
     }),
