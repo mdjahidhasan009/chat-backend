@@ -38,6 +38,7 @@ async function bootstrap() {
   app.use(passport.session());
 
   app.use((req, res, next) => {
+    console.log('Path:', req.path);
     console.log('Session:', req.session);
     console.log('User:', req.user);
     console.log('Is Authenticated:', req.isAuthenticated());
