@@ -30,7 +30,10 @@ import { CreateCallDto } from './dto/CreateCallDto';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3000'],
+    origin: [
+      'http://localhost:3000', // Local development
+      `${process.env.FRONTEND_URL}`, // Deployed frontend
+    ],
     credentials: true,
   },
   pingInterval: 10000,

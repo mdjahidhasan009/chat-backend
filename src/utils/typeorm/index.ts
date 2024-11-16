@@ -13,11 +13,11 @@ import { UserPresence } from './entities/UserPresence';
 import { Peer } from './entities/Peer';
 
 const entities = [
-  User, 
-  Session, 
-  Conversation, 
-  Message, 
-  Group, 
+  User,
+  Session,
+  Conversation,
+  Message,
+  Group,
   GroupMessage,
   Friend,
   FriendRequest,
@@ -30,15 +30,15 @@ const entities = [
 
 export default entities;
 
-export { 
-  User, 
-  Session, 
-  Conversation, 
-  Message, 
-  Group, 
-  GroupMessage, 
-  Friend, 
-  FriendRequest ,
+export {
+  User,
+  Session,
+  Conversation,
+  Message,
+  Group,
+  GroupMessage,
+  Friend,
+  FriendRequest,
   Profile,
   MessageAttachment,
   GroupMessageAttachment,

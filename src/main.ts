@@ -17,7 +17,13 @@ async function bootstrap() {
   const adapter = new WebsocketAdapter(app);
   app.useWebSocketAdapter(adapter);
   app.setGlobalPrefix('api');
-  app.enableCors({ origin: ['http://localhost:3000'], credentials: true });
+  app.enableCors({
+    origin: [
+      'http://localhost:3000', // Local development
+      `${process.env.FRONTEND_URL}`, // Deployed frontend
+    ],
+    credentials: true, // Allow cookies to be sent
+  });
   app.useGlobalPipes(new ValidationPipe());
   app.set('trust proxy', 'loopback');
 
@@ -28,7 +34,10 @@ async function bootstrap() {
       resave: false,
       name: 'CHAT_APP_SESSION_ID',
       cookie: {
-        maxAge: 86400000, //cookie expires 1 day later
+        maxAge: 86400000, // 1 day
+        httpOnly: true, // Prevent client-side JavaScript access
+        secure: process.env.NODE_ENV === 'production', // Send only over HTTPS in production
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-origin cookies
       },
       store: new TypeormStore().connect(sessionRepository),
     }),

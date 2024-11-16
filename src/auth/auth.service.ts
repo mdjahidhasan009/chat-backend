@@ -16,12 +16,14 @@ export class AuthService implements IAuthService {
       { username: userDetails.username },
       { selectAll: true },
     );
+
     if (!user)
       throw new HttpException('Invalid Credentials', HttpStatus.UNAUTHORIZED);
     const isPasswordValid = await compareHash(
       userDetails.password,
       user.password,
     );
+
     return isPasswordValid ? user : null;
   }
 }
