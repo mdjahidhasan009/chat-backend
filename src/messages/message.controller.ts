@@ -1,5 +1,4 @@
 import { Attachment } from './../utils/types';
-import { UploadedFiles } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
   Body,
@@ -11,6 +10,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { Routes, Services } from '../utils/constants';

@@ -16,10 +16,10 @@ import {GroupMiddleware} from "./middlewares/group.middleware";
 
 @Module({
   imports: [
-    UsersModule, 
+    UsersModule,
     MessageAttachmentsModule,
     ImageStorageModule,
-    TypeOrmModule.forFeature([Group, GroupMessage])
+    TypeOrmModule.forFeature([Group, GroupMessage]),
   ],
   controllers: [
     GroupController,

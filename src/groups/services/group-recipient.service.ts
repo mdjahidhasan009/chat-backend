@@ -51,7 +51,9 @@ export class GroupRecipientService implements IGroupRecipientService {
       throw new HttpException('User cannot be removed', HttpStatus.BAD_REQUEST);
     const group = await this.groupService.findGroupById(id);
     if (!group) throw new GroupNotFoundException();
+    // Not group owner
     if (group.owner.id !== issuerId) throw new NotGroupOwnerException();
+    // Temporary
     if (group.owner.id === removeUserId)
       throw new HttpException(
         'Cannot remove yourself as owner',
@@ -65,7 +67,7 @@ export class GroupRecipientService implements IGroupRecipientService {
   async isUserInGroup({ id, userId }: CheckUserGroupParams) {
     const group = await this.groupService.findGroupById(id);
     if (!group) throw new GroupNotFoundException();
-    const user = group.users.find((u) => u.id === userId);
+    const user = group.users.find((user) => user.id === userId);
     if (!user) throw new GroupParticipantNotFound();
     return group;
   }
@@ -77,7 +79,7 @@ export class GroupRecipientService implements IGroupRecipientService {
         'Cannot leave group as owner',
         HttpStatus.BAD_REQUEST,
       );
-    group.users = group.users.filter((u) => u.id !== userId);
+    group.users = group.users.filter((user) => user.id !== userId);
     return this.groupService.saveGroup(group);
   }
 }

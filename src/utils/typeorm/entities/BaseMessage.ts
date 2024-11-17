@@ -13,7 +13,7 @@ export abstract class BaseMessage {
   @Column('text', { nullable: true })
   content: string;
 
-  @CreateDateColumn({ name: 'created_at'})
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: number;
 
   @ManyToOne(() => User, (user) => user.messages)

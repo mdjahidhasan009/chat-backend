@@ -61,9 +61,10 @@ export class UserService implements IUserService {
       .where(statement, { query: `%${query}%` })
       .limit(10)
       .select([
+        'user.username',
         'user.firstName',
         'user.lastName',
-        'user.username',
+        'user.email',
         'user.id',
         'user.profile',
       ])

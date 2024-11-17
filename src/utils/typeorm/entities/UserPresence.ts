@@ -8,6 +8,7 @@ export class UserPresence {
   @Column({ nullable: true })
   statusMessage?: string;
 
+  ////TODO: will make it default false
   @Column({ nullable: false })
   showOffline: boolean;
 }

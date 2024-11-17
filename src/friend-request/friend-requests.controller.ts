@@ -51,17 +51,18 @@ export class FriendRequestController {
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const response = this.friendRequestService.accept({ id, userId });
+    const response = await this.friendRequestService.accept({ id, userId });
     this.event.emit(ServerEvents.FRIEND_REQUEST_ACCEPTED, response);
     return response;
   }
 
+  @Throttle(3, 10)
   @Delete(':id/cancel')
   async cancelFriendRequest(
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const response = this.friendRequestService.cancel({ id, userId });
+    const response = await this.friendRequestService.cancel({ id, userId });
     this.event.emit('friendrequest.cancel', response);
     return response;
   }
@@ -72,7 +73,7 @@ export class FriendRequestController {
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const response = this.friendRequestService.reject({ id, userId });
+    const response = await this.friendRequestService.reject({ id, userId });
     this.event.emit(ServerEvents.FRIEND_REQUEST_REJECTED, response);
     return response;
   }

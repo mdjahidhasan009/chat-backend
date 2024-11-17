@@ -17,6 +17,7 @@ import {
 import { CannotCreateMessageException } from './exceptions/CannotCreateMessage';
 import { CannotDeleteMessage } from './exceptions/CannotDeleteMessage';
 import { IMessageService } from './message';
+import { FriendNotFoundException } from "../friends/exceptions/FriendNotFound";
 
 @Injectable()
 export class MessageService implements IMessageService {
@@ -39,6 +40,7 @@ export class MessageService implements IMessageService {
       creator.id,
       recipient.id,
     );
+    if (!isFriend) throw new FriendNotFoundException();
     if (creator.id !== user.id && recipient.id !== user.id)
       throw new CannotCreateMessageException();
     const message = this.messageRepository.create({

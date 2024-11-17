@@ -28,7 +28,7 @@ export class FriendsController {
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const friend = this.friendsService.deleteFriend({ id, userId });
+    const friend = await this.friendsService.deleteFriend({ id, userId });
     this.event.emit(ServerEvents.FRIEND_REMOVED, { friend, userId });
     return friend;
   }

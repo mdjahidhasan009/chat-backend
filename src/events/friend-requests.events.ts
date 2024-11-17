@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MessagingGateway } from '../gateway/gateway';
 import { FriendRequest } from '../utils/typeorm';
-import { AcceptFriendRequestResponse } from 'src/utils/types';
+import { AcceptFriendRequestResponse } from '../utils/types';
 
 @Injectable()
 export class FriendRequestsEvents {
