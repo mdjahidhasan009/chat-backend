@@ -307,7 +307,7 @@ export class MessagingGateway
 
   @SubscribeMessage('videoCallAccepted')
   async handleVideoCallAccepted(
-    @MessageBody() data : CallAcceptedPayload,
+    @MessageBody() data: CallAcceptedPayload,
     @ConnectedSocket() socket: AuthenticatedSocket,
   ) {
     const callerSocket = this.sessions.getUserSocket(data.caller.id);

@@ -74,7 +74,7 @@ export class FriendRequestService implements IFriendRequestService {
     if (friendRequest.receiver.id !== userId)
       throw new FriendRequestException();
     friendRequest.status = 'accepted';
-    const updatedFriendRequest =  await this.friendRequestRepository.save(friendRequest);
+    const updatedFriendRequest = await this.friendRequestRepository.save(friendRequest);
     const newFriend = this.friendRepository.create({
       sender: friendRequest.sender,
       receiver: friendRequest.receiver,
@@ -90,7 +90,7 @@ export class FriendRequestService implements IFriendRequestService {
     if (friendRequest.status === 'accepted') throw new FriendRequestAcceptedException();
     if (friendRequest.receiver.id !== userId) throw new FriendRequestException();
 
-    friendRequest.status === 'rejected';
+    friendRequest.status = 'rejected';
     return this.friendRequestRepository.save(friendRequest);
   }
 

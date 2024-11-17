@@ -1,11 +1,11 @@
 import { DeleteFriendException } from './exceptions/DeleteFriend';
-import { FriendRequestNotFoundException } from './../friend-request/exceptions/FriendRequestNotFound';
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeleteFriendRequestParams } from "src/utils/types";
 import { Repository } from "typeorm";
 import { Friend } from "../utils/typeorm";
 import { IFriendsService } from "./friends";
+import { FriendNotFoundException } from "./exceptions/FriendNotFound";
 
 @Injectable()
 export class FriendsService implements IFriendsService {
@@ -18,9 +18,9 @@ export class FriendsService implements IFriendsService {
     return this.friendsRepository.find({
       where: [{ sender: { id } }, { receiver: { id } }],
       relations: [
-        'sender', 
-        'receiver', 
-        'sender.profile', 
+        'sender',
+        'receiver',
+        'sender.profile',
         'receiver.profile',
         'receiver.presence',
         'sender.presence',
@@ -31,7 +31,7 @@ export class FriendsService implements IFriendsService {
   findFriendById(id: number): Promise<Friend> {
     return this.friendsRepository.findOne(id, {
       relations: [
-        'sender', 
+        'sender',
         'receiver',
         'sender.profile',
         'sender.presence',
@@ -43,7 +43,7 @@ export class FriendsService implements IFriendsService {
 
   async deleteFriend({ id, userId }: DeleteFriendRequestParams) {
     const friend = await this.findFriendById(id);
-    if (!friend) throw new FriendRequestNotFoundException();
+    if (!friend) throw new FriendNotFoundException();
 
     if (friend.receiver.id !== userId && friend.sender.id !== userId) throw new DeleteFriendException();
 

@@ -1,6 +1,6 @@
-import { 
-  Entity, 
-  JoinColumn, 
+import {
+  Entity,
+  JoinColumn,
   PrimaryGeneratedColumn,
   OneToOne,
   CreateDateColumn,

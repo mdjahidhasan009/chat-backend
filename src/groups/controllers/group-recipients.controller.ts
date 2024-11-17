@@ -11,9 +11,9 @@ import { Routes, Services } from '../../utils/constants';
 import { IGroupRecipientService } from '../interfaces/group-recipient';
 import { AuthUser } from '../../utils/decorators';
 import { User } from '../../utils/typeorm';
-import { AddGroupRecipientParams } from '../../utils/types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SkipThrottle } from '@nestjs/throttler';
+import { AddGroupRecipientDto } from '../dtos/AddGroupRecipient.dto';
 
 @SkipThrottle()
 @Controller(Routes.GROUP_RECIPIENTS)
@@ -28,7 +28,7 @@ export class GroupRecipientsController {
   async addGroupRecipient(
     @AuthUser() { id: userId }: User,
     @Param('id', ParseIntPipe) id: number,
-    @Body() { username }: AddGroupRecipientParams,
+    @Body() { username }: AddGroupRecipientDto,
   ) {
     const params = { id, userId, username };
     const response = await this.groupRecipientService.addGroupRecipient(params);

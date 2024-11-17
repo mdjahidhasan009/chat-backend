@@ -15,15 +15,15 @@ describe('FriendRequestsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [FriendRequestController],
-      providers: [ 
+      providers: [
         {
           provide: Services.FRIENDS_REQUESTS_SERVICE,
           useValue: {
             getFriendRequests: jest.fn((x) => {x}),
             create: jest.fn((x) => x),
-          }
+          },
         },
-        EventEmitter2, 
+        EventEmitter2,
       ],
     }).compile();
 
@@ -38,20 +38,22 @@ describe('FriendRequestsController', () => {
     expect(friendRequestService).toBeDefined();
   });
 
-  
-  it('should call friendRequestService.getFriendRequests' , async () => {
+  it('should call friendRequestService.getFriendRequests', async () => {
     await controller.getFriendRequests(mockUser);
     expect(friendRequestService.getFriendRequests).toHaveBeenCalled();
-    expect(friendRequestService.getFriendRequests).toHaveBeenCalledWith(mockUser.id);
+    expect(friendRequestService.getFriendRequests).toHaveBeenCalledWith(
+      mockUser.id,
+    );
   });
-  
+
   it('should call createFriendRequest with correct params', async () => {
     await controller.createFriendRequest(mockUser, {
-      email: 'new2@gmail.com'
+      // email: 'new2@gmail.com',
+      username: 'new',
     });
     expect(friendRequestService.create).toHaveBeenCalledWith({
       user: mockUser,
-      email: 'new2@gmail.com'
-    })
+      email: 'new2@gmail.com',
+    });
   });
 });

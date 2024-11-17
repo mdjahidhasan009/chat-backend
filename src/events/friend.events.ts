@@ -6,16 +6,16 @@ import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class FriendEvents {
-  constructor(private readonly getway: MessagingGateway) {}
+  constructor(private readonly gateway: MessagingGateway) {}
 
   @OnEvent(ServerEvents.FRIEND_REMOVED)
   handleFriendRemoved({ userId, friend }: RemoveFriendEventPayload) {
     const { sender, receiver } = friend;
-    const socket = this.getway.sessions.getUserSocket(
+    const socket = this.gateway.sessions.getUserSocket(
       receiver.id === userId
-        ? userId
+        ? sender.id
         : receiver.id,
     );
-    socket?.emit(ServerEvents.FRIEND_REMOVED, { friend });
+    socket?.emit('onFriendRemoved', friend);
   }
 }
