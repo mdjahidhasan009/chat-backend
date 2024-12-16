@@ -294,6 +294,7 @@ export class MessagingGateway
     }
   }
 
+  // Step 3: Handle the video call initiation event from the frontend fired after on click video icon
   @SubscribeMessage('onVideoCallInitiate')
   async handleVideoCall(
     @MessageBody() data: CreateCallDto,
@@ -302,9 +303,12 @@ export class MessagingGateway
     const caller = socket.user;
     const receiverSocket = this.sessions.getUserSocket(data.recipientId);
     if (!receiverSocket) socket.emit('onUserUnavailable');
+    // Step 4: Emit an event to the recipient to initiate the video call
     receiverSocket.emit('onVideoCall', { ...data, caller });
   }
 
+  // Step 7: User click on the accept button to accept the video call and emit this event to the server to notify the
+  // caller that the receiver has accepted the call
   @SubscribeMessage('videoCallAccepted')
   async handleVideoCallAccepted(
     @MessageBody() data: CallAcceptedPayload,
@@ -318,9 +322,53 @@ export class MessagingGateway
     if (!conversation) return console.log('No conversation found');
     if (callerSocket) {
       const payload = { ...data, conversation, acceptor: socket.user };
+
+      // Step 8: Emit the video call accept event to the frontend to notify the caller that the receiver has accepted
+      // the call from backend
       callerSocket.emit('onVideoCallAccept', payload);
       socket.emit('onVideoCallAccept', payload);
+      ////TODO: will remove after test
+      // console.log(callerSocket);
+      // socket.emit('call', callerSocket);
     }
+  }
+
+  //receive sendingSignalOfCallerToReceiver from the receiver and send it to the caller
+  //sendingSignal
+  @SubscribeMessage('sendingSignalOfCallerToReceiver')
+  async handleSendingSignal(
+    @MessageBody() payload: any,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    console.log('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    console.log('sendingSignalOfCallerToReceiver => will send own single to other user')
+    const callerSocket = this.sessions.getUserSocket(payload.callerId);
+    // console.log(payload)
+    // callerSocket.emit('newuserJoined', { signal: payload.signal, callerId: payload.callerId });
+    //userJoined
+
+    // console.log(callerSocket)
+    // console.log(callerSocket)
+
+    callerSocket.emit('receivingSignalOfCaller', {
+      signal: payload.signal,
+      callerId: payload.callerId,
+    });
+  }
+
+  //receive returningSignalOfReceiverToCaller from the caller and send it to the receiver
+  //returningSignal
+  @SubscribeMessage('returningSignalOfReceiverToCaller')
+  async handleReturningSignal(
+    @MessageBody() payload: any,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const receiverSocket = this.sessions.getUserSocket(payload.callerId);
+    // takingReturnedSignal
+    receiverSocket.emit('receivingSignalOfReceiverToCaller', {
+      signal: payload.signal,
+      id: socket.user.id,
+    });
   }
 
   @SubscribeMessage(WebsocketEvents.VIDEO_CALL_REJECTED)
@@ -331,7 +379,7 @@ export class MessagingGateway
     const receiver = socket.user;
     const callerSocket = this.sessions.getUserSocket(data.caller.id);
     callerSocket &&
-    callerSocket.emit(WebsocketEvents.VIDEO_CALL_REJECTED, { receiver });
+      callerSocket.emit(WebsocketEvents.VIDEO_CALL_REJECTED, { receiver });
     socket.emit(WebsocketEvents.VIDEO_CALL_REJECTED, { receiver });
   }
 

@@ -1,4 +1,4 @@
-import { Attachment } from './../utils/types';
+import { Attachment } from "../utils/types";
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
   Body,
@@ -39,6 +39,8 @@ export class MessageController {
       },
     ]),
   )
+
+  //api/conversations/:id/messages
   @Post()
   async createMessage(
     @AuthUser() user: User,
