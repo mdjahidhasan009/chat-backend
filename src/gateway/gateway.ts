@@ -328,7 +328,6 @@ export class MessagingGateway
       callerSocket.emit('onVideoCallAccept', payload);
       socket.emit('onVideoCallAccept', payload);
       ////TODO: will remove after test
-      // console.log(callerSocket);
       // socket.emit('call', callerSocket);
     }
   }
@@ -340,15 +339,9 @@ export class MessagingGateway
     @MessageBody() payload: any,
     @ConnectedSocket() socket: AuthenticatedSocket,
   ) {
-    console.log('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-    console.log('sendingSignalOfCallerToReceiver => will send own single to other user')
     const callerSocket = this.sessions.getUserSocket(payload.callerId);
-    // console.log(payload)
     // callerSocket.emit('newuserJoined', { signal: payload.signal, callerId: payload.callerId });
     //userJoined
-
-    // console.log(callerSocket)
-    // console.log(callerSocket)
 
     callerSocket.emit('receivingSignalOfCaller', {
       signal: payload.signal,
