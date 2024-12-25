@@ -1,5 +1,5 @@
-import { FriendNotFoundException } from './../friends/exceptions/FriendNotFound';
-import { IFriendsService } from './../friends/friends';
+import { FriendNotFoundException } from "../friends/exceptions/FriendNotFound";
+import { IFriendsService } from "../friends/friends";
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -79,15 +79,33 @@ export class ConversationsService implements IConversationsService {
     const { username, message: content } = params;
     const recipient = await this.userService.findUser({ username });
     if (!recipient) throw new UserNotFoundException();
+
     if (creator.id === recipient.id)
-      throw new CreateConversationException('Cannot create Conversation with yourself');
-    const isFriends = await this.friendsService.isFriends(creator.id, recipient.id);
+      throw new CreateConversationException(
+        'Cannot create Conversation with yourself',
+      );
+
+    const isFriends = await this.friendsService.isFriends(
+      creator.id,
+      recipient.id,
+    );
     if (!isFriends) throw new FriendNotFoundException();
+
     const exists = await this.isCreated(creator.id, recipient.id);
     if (exists) throw new ConversationExistsException();
-    const newConversation = this.conversationRepository.create({ creator, recipient });
-    const conversation = await this.conversationRepository.save(newConversation);
-    const newMessage = this.messageRepository.create({ content, conversation, author: creator });
+
+    const newConversation = this.conversationRepository.create({
+      creator,
+      recipient,
+    });
+    const conversation = await this.conversationRepository.save(
+      newConversation,
+    );
+    const newMessage = this.messageRepository.create({
+      content,
+      conversation,
+      author: creator,
+    });
     await this.messageRepository.save(newMessage);
     return conversation;
   }
@@ -95,14 +113,19 @@ export class ConversationsService implements IConversationsService {
   async hasAccess({ id, userId }: AccessParams) {
     const conversation = await this.findById(id);
     if (!conversation) throw new ConversationNotFoundException();
-    return conversation.creator.id === userId || conversation.recipient.id === userId;
+    return (
+      conversation.creator.id === userId || conversation.recipient.id === userId
+    );
   }
 
   save(conversation: Conversation): Promise<Conversation> {
     return this.conversationRepository.save(conversation);
   }
 
-  getMessages({ id, limit }: GetConversationMessagesParams): Promise<Conversation> {
+  getMessages({
+    id,
+    limit,
+  }: GetConversationMessagesParams): Promise<Conversation> {
     return this.conversationRepository
       .createQueryBuilder('conversation')
       .where('id = :id', { id })

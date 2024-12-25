@@ -6,7 +6,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
-  OneToOne
+  OneToOne,
 } from 'typeorm';
 import { Message } from './Message';
 import { Group } from './Group';

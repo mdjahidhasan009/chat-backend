@@ -1,4 +1,4 @@
-import { AuthenticatedRequest } from './../utils/types';
+import { AuthenticatedRequest } from "../utils/types";
 import {
   Body,
   Controller,
