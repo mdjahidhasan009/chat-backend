@@ -1,9 +1,9 @@
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { Attachment, AuthenticatedRequest } from './types';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 
 export async function hashPassword(rawPassword: string) {
   const salt = await bcrypt.genSalt();

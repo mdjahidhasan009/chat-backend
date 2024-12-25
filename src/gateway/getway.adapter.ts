@@ -2,8 +2,8 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { getRepository } from 'typeorm';
 import { AuthenticatedSocket } from '../utils/interfaces';
 import { Session, User } from '../utils/typeorm';
-import * as cookieParser from 'cookie-parser';
-import * as cookie from 'cookie';
+import cookieParser from 'cookie-parser';
+import cookie from 'cookie';
 import { plainToInstance } from 'class-transformer';
 
 export class WebsocketAdapter extends IoAdapter {
