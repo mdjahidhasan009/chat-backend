@@ -23,6 +23,7 @@ async function bootstrap() {
       `${process.env.FRONTEND_URL}`, // Deployed frontend
     ],
     credentials: true, // Allow cookies to be sent
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
   app.useGlobalPipes(new ValidationPipe());
   app.set('trust proxy', 'loopback');
