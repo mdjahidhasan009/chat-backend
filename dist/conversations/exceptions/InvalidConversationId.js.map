@@ -1,0 +1,1 @@
+{"version":3,"file":"InvalidConversationId.js","sourceRoot":"","sources":["../../../src/conversations/exceptions/InvalidConversationId.ts"],"names":[],"mappings":";;;AAAA,2CAA2D;AAE3D,MAAa,8BAA+B,SAAQ,sBAAa;IAC/D;QACE,KAAK,CAAC,yBAAyB,EAAE,mBAAU,CAAC,WAAW,CAAC,CAAC;IAC3D,CAAC;CACF;AAJD,wEAIC"}

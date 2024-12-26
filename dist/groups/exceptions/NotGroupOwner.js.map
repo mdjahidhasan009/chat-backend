@@ -1,0 +1,1 @@
+{"version":3,"file":"NotGroupOwner.js","sourceRoot":"","sources":["../../../src/groups/exceptions/NotGroupOwner.ts"],"names":[],"mappings":";;;AAAA,2CAA2D;AAE3D,MAAa,sBAAuB,SAAQ,sBAAa;IACvD;QACE,KAAK,CAAC,mBAAmB,EAAE,mBAAU,CAAC,WAAW,CAAC,CAAC;IACrD,CAAC;CACF;AAJD,wDAIC"}
