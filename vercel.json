@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "npm start",
+  "installCommand": "npm install",
   "builds": [
     {
       "src": "src/main.ts",
