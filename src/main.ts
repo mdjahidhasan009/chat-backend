@@ -32,8 +32,8 @@ async function bootstrap() {
       'Authorization',
     ],
   });
-  const expressApp = app.getHttpAdapter().getInstance();
-  expressApp.set('trust proxy', true);
+  // const expressApp = app.getHttpAdapter().getInstance();
+  // expressApp.set('trust proxy', true);
 
   app.useGlobalPipes(new ValidationPipe());
   app.set('trust proxy', 'loopback');

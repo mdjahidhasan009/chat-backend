@@ -9,7 +9,7 @@ import {
   ConnectedSocket,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { IConversationsService } from '../conversations/conversations';
 import { IFriendsService } from '../friends/friends';
 import { IGroupService } from '../groups/interfaces/group';
