@@ -1,1 +1,0 @@
-{"version":3,"file":"ConversationNotFound.js","sourceRoot":"","sources":["../../../src/conversations/exceptions/ConversationNotFound.ts"],"names":[],"mappings":";;;AAAA,2CAA2D;AAE3D,MAAa,6BAA8B,SAAQ,sBAAa;IAC9D;QACE,KAAK,CAAC,wBAAwB,EAAE,mBAAU,CAAC,SAAS,CAAC,CAAC;IACxD,CAAC;CACF;AAJD,sEAIC"}
